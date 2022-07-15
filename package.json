@@ -12,6 +12,7 @@
   "dependencies": {
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "trello-node-api": "^0.0.9",
     "trello.js": "^1.2.3"
