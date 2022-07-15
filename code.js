@@ -3,7 +3,7 @@ const Trello = require("trello-node-api")("4c3f73efe799ce3be4134c6262af24c8", "9
 
 
 router.post("/complete", async(req, res) => {
-    console.log(req.body)
+    if (!req.body.idCard || !req.body.idList) return res.status(400).json({error: "no fields"})
     let data = {
         // name: req.body.name,
         // desc: 'Card description',
@@ -24,7 +24,7 @@ router.post("/complete", async(req, res) => {
     } catch (error) {
         if (error) {
             console.log('error ', error);
-            res.status(401).json({error: "error"})
+            res.status(400).json({error: "error"})
         }
     }
     res.status(200).json({ status: "ok" })
