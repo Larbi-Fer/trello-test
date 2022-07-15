@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://trello.com/power-ups/power-up.css">
+</head>
+<body>
+    <div id="content">
+
+        <label for="select-day">day: </label><select id="select-day" style="width: 100%;margin: 10px 0;padding: 5px 10px;"></select><br>
+        <label for="select-week">week: </label><select id="select-week" style="width: 100%;margin: 10px 0;padding: 5px 10px;"></select><br>
+        <label for="select-tasks">tasks: </label><select id="select-tasks" style="width: 100%;margin: 10px 0;padding: 5px 10px;"></select><br>
+        <label for="select-complete">complete: </label><select id="select-complete" style="width: 100%;margin: 10px 0;padding: 5px 10px;"></select><br>
+        <label for="select-incomplete">incomplete: </label><select id="select-incomplete" style="width: 100%;margin: 10px 0;padding: 5px 10px;"></select><br>
+
+        <button id="save" style="width: 100%">save</button>
+        <button id="test" style="width: 100%">test</button>
+
+    </div>
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+    <!-- <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script> -->
+    <script>
+        /* const domContainer = document.querySelector('#content');
+        console.log(domContainer)
+        const root = ReactDOM.createRoot(domContainer);
+        root.render(e(LikeButton));
+
+        const e = React.createElement;
+        e(
+        'button',
+        { onClick: () => this.setState({ liked: true }) },
+        'Like'
+        ); */
+
+        t = TrelloPowerUp.iframe()
+
+        types = [ "day", "week", "tasks", "complete", "incomplete" ]
+
+        t.render(() => {
+            t.sizeTo("#content").done()
+        })
+
+        t.getAll("board", "shared").then(tasks => {
+            tasks = tasks.board.shared
+            tasks = [tasks.day, tasks.week, tasks.tasks, tasks.complete, tasks.incomplete]
+            t.lists("name", "id").then(lists => {
+                i = 0
+                types.forEach(type => {
+                    var selecte = document.getElementById("select-" + type)
+                    lists.forEach(list => {
+                        op = document.createElement("option")
+                        op.textContent = list.name
+                        op.value = list.id
+                        selecte.appendChild(op)
+                        if (tasks[i] == list.id) selecte.value = list.id
+                    })
+                    i++;
+                });
+            })
+        })
+
+
+        document.getElementById("save").addEventListener("click", e => {
+            lists = []
+            types.forEach(type => {
+                lists.push(document.getElementById("select-" + type).value)
+            });
+            return t.set("board", "shared", 'day', lists[0]).then(() => t.set("board", "shared", 'week', lists[1]).then(() => t.set("board", "shared", 'tasks', lists[2]).then(() => t.set("board", "shared", 'complete', lists[3]).then(() => t.set("board", "shared", 'incomplete', lists[4]).then(() => t.alert({ message: "saved", duration: 4 }))))))
+            // return t.set("board", "shared", types, lists).then(() => t.alert({ message: "saved", duration: 4 }))
+         })
+
+         document.getElementById("test").addEventListener("click", () => {
+            const cardEl = document.createElement("trello-card");
+
+            // Determines whether colorblind labels should be used or not. Default is true.
+            cardEl.colorblind = false;
+
+            // Determines whether to show text on labels. Default is true.
+            cardEl.labeltext = true;
+
+            cardEl.card = {
+                id: "5b907e0e39cccd595f1c8bfa",
+                name: "Name of card", // Required
+                url: "https://trello.com/c/something", // Required
+                closed: false,
+                idAttachmentCover: null,
+                badges: {
+                    attachmentsByType: {
+                    trello: { board: 1, card: 0 },
+                    },
+                    location: false,
+                    votes: 0,
+                    viewingMemberVoted: false,
+                    subscribed: true,
+                    checkItems: 5,
+                    checkItemsChecked: 4,
+                    comments: 3,
+                    attachments: 7,
+                    description: true,
+                    due: null,
+                    dueComplete: false,
+                },
+                labels: [
+                    {
+                    id: "5b8fd55d451e437262fe7aff",
+                    idBoard: "599dbf8d693c9eeaed69ca09",
+                    name: "bug",
+                    color: "red",
+                    },
+                ],
+                stickers: [],
+                attachments: [], // Only need attachment for idAttachmentCover
+                members: [
+                    {
+                    id: "556c8537a1928ba745504dd8",
+                    avatarHash: "0b48c7057767cca8f339109b27a064d7",
+                    fullName: "Matt Cowan",
+                    username: "mattcowan",
+                    initials: "MC",
+                    },
+                ],
+                customFields: [],
+                customFieldItems: [],
+            };
+
+            // There is a custom event that is fired when a user clicks on the labels that
+            // you can listen and respond to.
+            cardEl.addEventListener("labelTextChanged", (e) => {
+            console.log("labeltext property is now", e.detail.labeltext);
+            });
+
+            document.body.appendChild(cardEl);
+         })
+
+    </script>
+</body>
+</html>

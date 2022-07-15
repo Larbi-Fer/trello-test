@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+</head>
+
+<body>
+
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment-precise-range-plugin@1.3.0/moment-precise-range.min.js"></script>
+  <script>
+    const g = (date, st) => !date ? "" : `${date}${st} `
+    URL = "http://localhost:5000/"
+    TrelloPowerUp.initialize({
+      'card-buttons': function (t, options) {
+        return [
+          {
+            icon: "https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png",
+            text: "ID card",
+            callback: function (t) {
+              return t.card('id').then(card => {
+                console.log(JSON.parse(JSON.stringify(card)))
+                alert(`id: "${card.id}"`)
+              })
+            }
+          },
+          {
+            icon: "https://cdn-icons-png.flaticon.com/512/709/709510.png",
+            text: "complete",
+            callback: function (t) {
+              return t.card('all').then(card => {
+                t.get("board", "shared", "complete").then(idList => {
+                  if (!idList) return t.alert("no list complete")
+                  fetch(URL + "card/complete", {
+                    method: "post",
+                    mode: "cors",
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ idCard: card.id, idList })
+                  }).then(d => {
+                    if (d.status == "ok") t.alert("complete")
+                  })
+                })
+              })
+            },
+          }
+        ]
+      },
+      'board-buttons': function (t, options) {
+        return [
+          { 
+            icon: "https://cdn-icons-png.flaticon.com/512/3524/3524659.png",
+            text: "options",
+            callback: function (t) {
+              t.popup({
+                title: "options",
+                url: "./settings.html",
+                height: 140,
+              })
+            }
+          }
+        ]
+      },
+      'list-actions': function (t) {
+            return t.list('name', 'id')
+            .then(function (list) {
+            return [{
+                text: "Get List ID",
+                callback: function (t) {
+                // Trello will call this if the user clicks on this action
+                // we could for example open a new popover...
+                alert(`list name: ${list.name}, ID: "${list.id}"`)
+                t.popup({
+                  title: 'Settings',
+                  url: './settings.html',
+                  height: 184
+                });
+                }
+            }];
+        });
+      },
+      'show-settings': function(t, options){
+        return t.popup({
+          title: 'Settings',
+          url: './settings.html',
+          height: 184 // we can always resize later
+        });
+      },
+      "card-badges": function (t, opts) {
+        // let cardAttachments = opts.attachments; // Trello passes you the attachments on the card
+        return t
+          .card("all")
+          // .get("name", "id")
+          .then(function (card) {
+            var due = card.due
+            var start = card.badges.start
+            var dueComplete = card.dueComplete
+            return [
+              {
+                // Dynamic badges can have their function rerun
+                // after a set number of seconds defined by refresh.
+                // Minimum of 10 seconds.
+                  // we could also return a Promise that resolves to
+                  // this as well if we needed to do something async first
+                dynamic: () => {
+                  var duedate;
+                  var time;
+                  return {
+                    text: (() => {
+                      duedate = false
+                      time = false
+                      if (dueComplete) return null
+                      if (start) {
+                        start = new Date(start)
+                        now = new Date()
+                        m = new Date(start - now)
+                        if (m > 0) {
+                          time = true
+                          start = moment(start)
+                          now = moment(now)
+                          d = moment.preciseDiff(start, now, true)
+                          return g(d["year"], "Y") + g(d["months"], "M") + g(d["days"], "D") + g(d["hours"], "H") + g(d["minutes"], "M")
+                        }
+                      }
+
+                      if (!due) return null
+                      due = new Date(due)
+                      now = new Date()
+                      m = new Date(due - now)
+                      if (m < 0) return null
+                      time = true
+                      due = moment(due)
+                      now = moment(now)
+                      d = moment.preciseDiff(due, now, true)
+                      duedate = true
+                      return g(d["year"], "Y") + g(d["months"], "M") + g(d["days"], "D") + g(d["hours"], "H") + g(d["minutes"], "M")
+                      // return `${}:`
+                    })(),
+                    color: duedate ? "green" : null,
+                    icon: time ? "./time.png" : null,
+                    refresh: 60
+                }}
+              },
+            ];
+          });
+      },
+
+      'card-back-section': function(t, options){
+        return {
+          title: 'My Card Back Section',
+          icon: GRAY_ICON, // Must be a gray icon, colored icons not allowed.
+          content: {
+            type: 'iframe',
+            url: t.signUrl('./settings.html'),
+            height: 230, // Max height is 1500.
+          },
+          action: {
+            text: 'My Action',
+            callback: (t) => t.popup({
+              title: 'Settings',
+              url: './settings.html',
+              height: 184
+            }),
+          },
+        }
+      }
+    })
+  </script>
+</body>
+</html>
