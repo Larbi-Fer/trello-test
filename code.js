@@ -3,6 +3,7 @@ const Trello = require("trello-node-api")("4c3f73efe799ce3be4134c6262af24c8", "9
 
 
 router.post("/complete", async(req, res) => {
+    console.log(req.body)
     let data = {
         // name: req.body.name,
         // desc: 'Card description',
