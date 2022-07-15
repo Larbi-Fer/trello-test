@@ -35,7 +35,7 @@
                   if (!idList) return t.alert("no list complete")
                   fetch(URL + "card/complete", {
                     method: "post",
-                    mode: "cors",
+                    mode: "no-cors",
                     headers: {
                       'Content-Type': 'application/json'
                     },
