@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require("cors")
 const bodyParser = require('body-parser')
-console.log("Start")
+
 const r = require('./code.js');
 
 const app = express()
