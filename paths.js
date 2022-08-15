@@ -80,7 +80,7 @@ router.post('/move-cards-to-list', (req, res) => {
 
 router.get('/webhook', (req, res) => {
     console.log(req.body)
-    req.status(200)
+    return res.status(200).json({ status: "ok" })
 })
 
 router.get('/addwebhook', async(req, res) => {
