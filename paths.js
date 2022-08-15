@@ -78,7 +78,7 @@ router.post('/move-cards-to-list', (req, res) => {
     });
 })
 
-router.post('/webhook', (req, res) => {
+router.get('/webhook', (req, res) => {
     console.log(req.body)
 })
 
