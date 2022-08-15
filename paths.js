@@ -80,12 +80,13 @@ router.post('/move-cards-to-list', (req, res) => {
 
 router.get('/webhook', (req, res) => {
     console.log(req.body)
+    req.status(200)
 })
 
 router.get('/addwebhook', async(req, res) => {
     let data = {
         description: 'Webhook description',
-        callbackURL: 'https://ai-way.herokuapp.com/webhook', // REQUIRED
+        callbackURL: 'https://ai-way.herokuapp.com/card/webhook', // REQUIRED
         idModel: '62c8815599d7756a150a56ff', // REQUIRED
         // active: false
     };
