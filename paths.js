@@ -79,8 +79,11 @@ router.post('/move-cards-to-list', (req, res) => {
 })
 
 router.get('/webhook', (req, res) => {
-    console.log(req.body)
     return res.status(200).json({ status: "ok" })
+})
+router.post('/webhook', (req, res) => {
+    console.log(req.body)
+    return res.status(200).send(200)
 })
 
 router.get('/addwebhook', async(req, res) => {
