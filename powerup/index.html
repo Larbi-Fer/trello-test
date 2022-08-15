@@ -13,7 +13,6 @@
   <!-- Axios -->
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script>
-    const g = (date, st) => !date ? "" : `${date}${st} `
     URL = "https://ai-way.herokuapp.com/"
     TrelloPowerUp.initialize({
       'card-buttons': function (t, options) {
@@ -22,7 +21,7 @@
             icon: "https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png",
             text: "ID card",
             callback: function (t) {
-              return t.card('id').then(card => {
+              return t.card('all').then(card => {
                 console.log(JSON.parse(JSON.stringify(card)))
                 alert(`id: "${card.id}"`)
               })
@@ -37,7 +36,7 @@
                   if (!idList) return t.alert("no list complete")
                   try {
                     var { data } = await axios.post(URL + 'card/complete', { idCard: card.id, idList })
-                    if (data.status == "ok") t.alert("complete")
+                    t.alert("complete")
                   } catch (e) {
                     console.log(e)
                     t.alert("error !!")
@@ -54,33 +53,105 @@
           { 
             icon: "https://cdn-icons-png.flaticon.com/512/3524/3524659.png",
             text: "options",
-            callback: function (t) {
+            callback: function (t, opts) {
               t.popup({
                 title: "options",
-                url: "./settings.html",
-                height: 140,
+                items: [{
+                  text: "settings",
+                  callback: (t, opts) => t.popup({
+                    title: "settings",
+                    url: "./settings.html",
+                    height: 140,
+                  })
+                }, {
+                  text: "create linked cards",
+                  callback: (t, opts) => t.popup({
+                    title: "add cards",
+                    url: "./addCards.html",
+                    height: 140,
+                  })
+                }]
+                /* url: './addCards.html',
+                height: 184,
+                width: 210, */
               })
             }
           }
         ]
       },
-      'list-actions': function (t) {
-            return t.list('name', 'id')
-            .then(function (list) {
-            return [{
+      'card-back-section': function(t, options){
+        return {
+          title: 'My Card Back Section',
+          // icon: GRAY_ICON, // Must be a gray icon, colored icons not allowed.
+          content: {
+            type: 'iframe',
+            url: t.signUrl('https://history-bac.netlify.app'),
+            // url: './addCards.html',
+            height: 230, // Max height is 1500.
+          },
+          action: {
+            text: 'My Action',
+            callback: (t) => t.popup({
+              title: "title",
+              url: "./addCards.html",
+              height: 150
+            }),
+          }
+        };
+      },
+      'list-actions':  t => {
+          var lists = []
+          t.lists("id", "name").then(listsp => lists = listsp)
+          return t.list("all")
+          .then(async list => {
+            console.log("list", list)
+            var listC = [null, null]
+            var listInC = [null, null]
+            console.log("start")
+            s = await t.getAll("board", "shared")
+            s = s.board.shared
+            if (s.complete){
+              listC[0] = s.complete
+              listC[1] = lists.find(v => v.id == s.complete).name
+            }
+            if (s.incomplete) {
+              listInC[0] = s.incomplete
+              listInC[1] = lists.find(v => v.id == s.incomplete).name
+            }
+            var returnList = [{
                 text: "Get List ID",
                 callback: function (t) {
-                // Trello will call this if the user clicks on this action
-                // we could for example open a new popover...
+                console.log(list)
                 alert(`list name: ${list.name}, ID: "${list.id}"`)
-                t.popup({
-                  title: 'Settings',
-                  url: './settings.html',
-                  height: 184
-                });
                 }
             }];
-        });
+            console.log(listC)
+            if (list.id != listC[0] || list.id != listInC[0]) {
+              returnList.push( {
+                text: `move completed cards to "${listC[1]}"`,
+                callback: t => {
+                  var dueComplete = []
+                  list.cards.forEach(card => {
+                    if (card.dueComplete) dueComplete.push(card.id)
+                  });
+                  console.log(dueComplete)
+                }
+              })
+              returnList.push( {
+                  text: `move incompleted cards to "${listInC[1]}"`,
+                  callback: t => {
+                    var dueComplete = []
+                    list.cards.forEach(card => {
+                      if (!card.dueComplete && new Date(card.due) < new Date()) dueComplete.push(card.id)
+                    });
+                    console.log(dueComplete)
+                  }
+              })
+            }
+            console.log("-----")
+            console.log(listC, listInC)
+            return returnList
+          });
       },
       'show-settings': function(t, options){
         return t.popup({
@@ -89,84 +160,6 @@
           height: 184 // we can always resize later
         });
       },
-      "card-badges": function (t, opts) {
-        // let cardAttachments = opts.attachments; // Trello passes you the attachments on the card
-        return t
-          .card("all")
-          // .get("name", "id")
-          .then(function (card) {
-            var due = card.due
-            var start = card.badges.start
-            var dueComplete = card.dueComplete
-            return [
-              {
-                // Dynamic badges can have their function rerun
-                // after a set number of seconds defined by refresh.
-                // Minimum of 10 seconds.
-                  // we could also return a Promise that resolves to
-                  // this as well if we needed to do something async first
-                dynamic: () => {
-                  var duedate;
-                  var time;
-                  return {
-                    text: (() => {
-                      duedate = false
-                      time = false
-                      if (dueComplete) return null
-                      if (start) {
-                        start = new Date(start)
-                        now = new Date()
-                        m = new Date(start - now)
-                        if (m > 0) {
-                          time = true
-                          start = moment(start)
-                          now = moment(now)
-                          d = moment.preciseDiff(start, now, true)
-                          return g(d["year"], "Y") + g(d["months"], "M") + g(d["days"], "D") + g(d["hours"], "H") + g(d["minutes"], "M")
-                        }
-                      }
-
-                      if (!due) return null
-                      due = new Date(due)
-                      now = new Date()
-                      m = new Date(due - now)
-                      if (m < 0) return null
-                      time = true
-                      due = moment(due)
-                      now = moment(now)
-                      d = moment.preciseDiff(due, now, true)
-                      duedate = true
-                      return g(d["year"], "Y") + g(d["months"], "M") + g(d["days"], "D") + g(d["hours"], "H") + g(d["minutes"], "M")
-                      // return `${}:`
-                    })(),
-                    color: duedate ? "green" : null,
-                    icon: time ? "./time.png" : null,
-                    refresh: 60
-                }}
-              },
-            ];
-          });
-      },
-
-      'card-back-section': function(t, options){
-        return {
-          title: 'My Card Back Section',
-          icon: GRAY_ICON, // Must be a gray icon, colored icons not allowed.
-          content: {
-            type: 'iframe',
-            url: t.signUrl('./settings.html'),
-            height: 230, // Max height is 1500.
-          },
-          action: {
-            text: 'My Action',
-            callback: (t) => t.popup({
-              title: 'Settings',
-              url: './settings.html',
-              height: 184
-            }),
-          },
-        }
-      }
     })
   </script>
 </body>

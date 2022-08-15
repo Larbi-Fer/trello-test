@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://trello.com/power-ups/power-up.css">
+    <style>
+        .circal {
+            border-radius: 50%;
+            padding: 5px 10px;
+            margin: 14px 10px;
+            color: #fff;
+            font-size: 15px;
+        }
+        .circal.red {background-color: #f22;}
+        .circal.green {background-color: #2f2;}
+        .item {
+            display: flex;
+        }
+        body {
+            margin-right: 5px;
+        }
+        input {
+            margin: 10px 0px;
+        }
+        .btn {
+            width: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, .1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient( 45deg, #555, #999);
+            border-radius: 30px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient( 45deg, #999, #555);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+            background: #777;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+
+    </div>
+
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+
+    <!-- Axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script> -->
+    <script type="text/babel">
+
+        // URL = "https://ai-way.herokuapp.com/"
+        URL = "http://localhost:5000/"
+
+        class App extends React.Component {
+            t = TrelloPowerUp.iframe()
+            constructor(props) {
+                super(props)
+                this.state = {
+                    "cards": [{ name: "" }]
+                }
+            }
+
+            renderS = () => this.t.render(() => {
+                this.t.sizeTo("#content").done()
+            })
+
+            submit = async() => {
+                // res = await t.get("board", "shared", "incomplete")
+                axios.post(URL + "card/addcards", { cards: this.state.cards, title: document.getElementById("title").value })
+            }
+
+            render(){
+                return (
+                    <React.StrictMode>
+                        <label for="title">Title</label>
+                        <input id="title" type="text" placeholder="title" />
+                        <label>Cards</label>
+                        <Inputs t={this.t} cards={this.state.cards} addCard={card => this.setState(lCards => {
+                            lCards.cards.push({ name: "" })
+                            return {"cards": lCards.cards}
+                        })} onChange={(text, i) => {
+                            this.setState(({ cards }) => {
+                                cards[i] = { name: text }
+                                return { "cards": cards }
+                            })
+                        }} removeCard={i => {
+                            this.setState(({cards}) => {
+                                cards.splice(i, 1)
+                                return { "cards": cards }
+                            })
+                        }}
+                        renderS={this.renderS}
+                        />
+                        <button className="btn" onClick={this.submit}>Create</button>
+                    </React.StrictMode>
+                )
+            }
+        };
+
+        class Inputs extends React.Component {
+            constructor(props) {
+                super(props)
+                this.props.renderS()
+            }
+            addCard = () => {
+                this.props.addCard("name")
+                this.props.renderS()
+            }
+
+            onChange = i => e => this.props.onChange(e.target.value, i)
+
+            render() {
+                return this.props.cards.map((card, i) => {
+                    var isLast = i == this.props.cards.length-1
+                    return (
+                        <div class="item">
+                            <input type="text" onChange={this.onChange(i)} placeholder={"card name " + (i+1)} value={card.name} />
+                            <button class={"circal" + (isLast ? " green" : " red")} onClick={i == this.props.cards.length-1 ? this.addCard : () => {this.props.removeCard(i); this.props.renderS()}}>{ isLast ? "+" : "-" }</button>
+                        </div>
+                    )
+            })}
+        }
+        /* var len = cards.length
+        var addCard = () => setCards([ { name: "" } ])
+        var onChange = i => e => {
+            cards[i] = { name: cards.name + e.target.value }
+            setCards(cards)
+        }
+
+        return cards.map((card, i) => {
+            return (
+                <div class="item">
+                    <input type="text" onChange={onChange(i)} value={card.name} />
+                    <button class="circel" onClick={addCard}>{ i == len ? "-" : "+" }</button>
+                </div>
+            )
+        }) */
+
+        const domContainer = document.querySelector('#content')
+
+        ReactDOM.render(<App />, domContainer)
+    </script>
+</body>
+</html>
