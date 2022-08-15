@@ -82,7 +82,7 @@ router.get('/webhook', (req, res) => {
     return res.status(200).json({ status: "ok" })
 })
 router.post('/webhook', (req, res) => {
-    console.log(req.body)
+    console.log(req.body.action)
     return res.status(200).send(200)
 })
 
