@@ -91,11 +91,7 @@
           },
           action: {
             text: 'My Action',
-            callback: (t) => t.popup({
-              title: "title",
-              url: "./addCards.html",
-              height: 150
-            }),
+            callback: (t) => console.log("callback")
           }
         };
       },
@@ -107,7 +103,6 @@
             console.log("list", list)
             var listC = [null, null]
             var listInC = [null, null]
-            console.log("start")
             s = await t.getAll("board", "shared")
             s = s.board.shared
             if (s.complete){
@@ -160,6 +155,31 @@
           height: 184 // we can always resize later
         });
       },
+      'list-sorters': function (t) {
+        return t.list('name', 'id')
+        .then(function (list) {
+          return [{
+            text: "Card Start Date",
+            callback: function (t, opts) {
+              // badges
+              var sortedCards = opts.cards.sort(
+                (a, b) => {
+                  console.log("start", a)
+                  if (a.start > b.start) {
+                    return 1;
+                  } else if (b.start > a.start) {
+                    return -1;
+                  }
+                  return 0;
+                });
+
+              return {
+                sortedIds: sortedCards.map(function (c) { return c.id; })
+              };
+            }
+          }];
+        });
+      }
     })
   </script>
 </body>
