@@ -103,6 +103,8 @@ router.post('/move-cards-to-list', (req, res) => {
 
 router.get('/webhook', (req, res) => {
     const token = req.query.code
+    oAuth2Client.getToken("4/0AdQt8qgulyCIlr8PMcDyGhXeI0BF5rfCtlndigJ0tGb5eLA0SYT5GwQCqZH6xwWFKsDHCA").then(v => console.log("value", v)).catch(err => console.error("error", err))
+    return res.send("ok")
     oAuth2Client.setCredentials({ refresh_token: token })
     const calendar = google.calendar({ version: "v3", auth: oAuth2Client })
     const start = new Date(new Date().setDate(new Date().getDate() + 2))
