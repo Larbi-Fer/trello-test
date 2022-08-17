@@ -17,6 +17,7 @@
     "express": "^4.18.1",
     "googleapis": "^105.0.0",
     "nodemon": "^2.0.19",
+    "ticktick-node-api": "^1.2.0",
     "trello-node-api": "^0.0.9",
     "trello.js": "^1.2.3"
   }

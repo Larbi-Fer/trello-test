@@ -1,7 +1,14 @@
+const password = "28002157"
 const router = require('express').Router()
 const Trello = require("trello-node-api")("4c3f73efe799ce3be4134c6262af24c8", "97cb553962782fd607ad992fbc4112c713e1d1d5633026413832d9a1f959e10a")
+
 // google calendar
 const { google } = require("googleapis")
+
+// ticktick
+const TickTickAPI = require('ticktick-node-api')
+const tickAPI = new TickTickAPI()
+
 const { OAuth2 } = google.auth
 const client_id = "750612677491-6519kichdcfia0ha0m4vreirqq52mh5r.apps.googleusercontent.com"
 // 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
@@ -20,9 +27,15 @@ const  rl = oAuth2Client.generateAuthUrl({
 })
 console.log(rl)
 
-router.get("/callback", (req, res) => {
-    console.log(req.query.code)
-    res.send("ok")
+router.get("/callback", async(req, res) => {
+    try {
+        const tick = await tickAPI.login({ username: "ferhaoui.20044@gmail.com", password })
+        // const tasks = await tickAPI.getCompletedTasks({begin: new Date("06/09/2022"), end: new Date("06/11/2022")})
+        res.send("ok")
+    } catch (error) {
+        res.send("error")
+        console.error(error)
+    }
 })
 
 router.post("/complete", async(req, res) => {
@@ -102,9 +115,9 @@ router.post('/move-cards-to-list', (req, res) => {
 })
 
 router.get('/webhook', (req, res) => {
+    return res.status(200).send("ok")
     const token = req.query.code
     oAuth2Client.getToken("4/0AdQt8qgulyCIlr8PMcDyGhXeI0BF5rfCtlndigJ0tGb5eLA0SYT5GwQCqZH6xwWFKsDHCA").then(v => console.log("value", v)).catch(err => console.error("error", err))
-    return res.send("ok")
     oAuth2Client.setCredentials({ refresh_token: token })
     const calendar = google.calendar({ version: "v3", auth: oAuth2Client })
     const start = new Date(new Date().setDate(new Date().getDate() + 2))
@@ -139,8 +152,15 @@ router.get('/webhook', (req, res) => {
     return res.status(200).json({ status: "ok" })
 })
 router.post('/webhook', (req, res) => {
-    console.log(req.body.action)
-    return res.status(200).send(200)
+    const action = req.body.action
+    if (action.type === "updateCard") {
+        if (action.data.old.dueComplete === false) {
+            let data = { pos: 'bottom' }
+            Trello.card.update(action.data.card.id, data).then(response => console.log(response)).catch(err => console.error(err))
+            return res.json({ status: "card completd" })
+        }
+        return res.status(200).send(200)
+    }
 })
 
 router.patch("/rearrangement", (req, res) => {
