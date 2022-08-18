@@ -22,8 +22,9 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
                 await Trello.cards.updateCardCheckItem({ idChecklist: checklist, idCheckItem: checkItem, state: !data.old.dueComplete, id, pos: "bottom" })
             }
             else if (data.old.due) {
-                /* var attachments = await Trello.cards.getCardAttachments({ id: "62fe1d05dc3a8d0017101e99" })
+                var attachments = await Trello.cards.getCardAttachments({ id: "62fe1d05dc3a8d0017101e99" })
                 var attachments = attachments.filter(t => t.url.startsWith("https://trello.com/"))
+                if (attachments.length === 0) return
                 const dates = []
                 attachments.forEach(async at => {
                     try {
@@ -35,15 +36,15 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
                         res.send("error")
                     }
                 });
-                if (dates.length === 0) return */
-                if (!data.card.due) return
-                const card = await Trello.cards.getCard({ id })
+                if (dates.length === 0) return await Trello.cards.updateCard({ id, due: null })
+                const due = max(dates)
+                await Trello.cards.updateCard({ id, due })
+                /* const card = await Trello.cards.getCard({ id })
                 var due = card.due
-                if (card.badges.attachmentsByType.trello.card === 1) await Trello.cards.updateCard({ id, due: data.card.due })
+                if (card.badges.attachmentsByType.trello.card === 1) return await Trello.cards.updateCard({ id, due: data.card.due })
                 if (!due) return
                 due = new Date(due)
-                if (due > new Date(data.card.due)) return
-                await Trello.cards.updateCard({ id, due: data.card.due })
+                if (due > new Date(data.card.due)) return */
             }
         // delete card
         } else if (action.type === "deleteCard") {
@@ -62,12 +63,12 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
 })
 
 
-/* function max(array) {
+function max(array) {
     var valueMax = 0;
     array.forEach(value => {
         if (valueMax < value) valueMax = value
     })
     return valueMax
-} */
+}
 
 module.exports = router
