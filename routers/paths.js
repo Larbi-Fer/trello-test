@@ -81,11 +81,11 @@ router.post("/addcards", async(req, res) => {
         };
         const result = await Trello2.cards.createCard(data);
         const check = await Trello2.checklists.createChecklist({ idCard: result.id, name: "les steps" });
-        /* await Trello2.webhooks.createWebhook({
-            idModel: cardData.id,
-            description: `connect this card (${cardData.url}) with (${cardData.url})`,
-            callbackURL: `${URL}callback/connect2cardsv1/${result.id}?checkItem=${checkItem.id}&attch=${attch.id}&checklist=${check.id}`
-        }) */
+        await Trello2.webhooks.createWebhook({
+            idModel: result.id,
+            description: `connect this card (${result.url}) with multi cards`,
+            callbackURL: `${URL}callback/connect2cardsv2`
+        })
         
         cards.forEach(async card => {
             try {
@@ -100,7 +100,7 @@ router.post("/addcards", async(req, res) => {
                 const attch = await Trello2.cards.createCardAttachment({ id: result.id, url: cardData.url })
                 await Trello2.webhooks.createWebhook({
                     idModel: cardData.id,
-                    description: `connect this card (${cardData.url}) with (${cardData.url})`,
+                    description: `connect this card (${cardData.url}) with (${result.url})`,
                     callbackURL: `${URL}callback/connect2cardsv1/${result.id}?checkItem=${checkItem.id}&attch=${attch.id}&checklist=${check.id}`
                 })
             } catch (error) {
