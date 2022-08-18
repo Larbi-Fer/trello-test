@@ -34,13 +34,14 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
                     try {
                         const idCard = at.url.split('/')[4]
                         const due = (await Trello.cards.getCard({ id: idCard })).due
+                        console.log(due, idCard)
                         due ? dates.push(new Date(due)) : null
                     } catch (error) {
                         console.error(error)
                         res.send("error")
                     }
                 });
-                console.log(5)
+                console.log(5, dates)
                 if (dates.length === 0) return await Trello.cards.updateCard({ id, due: null })
                 console.log(6)
                 const due = max(dates)
