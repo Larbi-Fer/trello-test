@@ -215,17 +215,17 @@ router.patch("/rearrangement", async(req, res) => {
                 idList2: idLists[0]
             },
         ]
-        try {
+        /* try {
             // const t = await Trello.cards.createCardAttachment({ id: "62f93d4f4f0657201efb851a", url: "https://trello.com/c/r64RFMG4/56-formation-des-phrases" })
-            const t = (await Trello2.cards.getCard({ id: "AjqoCISK" })).due
+            const t = await Trello2.boards.getBoardCardsFilter({ id: "62c8815599d7756a150a56ff", filter: "closed" })
             // await Trello2.cards.updateCardCheckItem({ idChecklist: "62fe01d59372e300df212dd8", idCheckItem: "62fe0eb93eedca70ac87f9fa", state: "complete", id: "62f93c42866a297e09ac948d", pos: "bottom" })
             // console.log(t)
-            return res.json(t)
+            return res.json(t.length)
         } catch (error) {
             res.send("error")
             console.log(error)
         }
-        return
+        return */
         const lists = Trello2.lists
         idLists.forEach(async(idList, i) => {
             try {
