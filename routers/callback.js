@@ -33,8 +33,9 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
                     console.log(4)
                     try {
                         const idCard = at.url.split('/')[4]
+                        console.log(idCard)
                         const due = (await Trello.cards.getCard({ id: idCard })).due
-                        console.log(due, idCard)
+                        console.log(due)
                         due ? dates.push(new Date(due)) : null
                     } catch (error) {
                         console.error(error)
