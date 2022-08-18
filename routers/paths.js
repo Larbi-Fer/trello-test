@@ -216,11 +216,13 @@ router.patch("/rearrangement", async(req, res) => {
             },
         ]
         /* try {
-            // const t = await Trello.cards.createCardAttachment({ id: "62f93d4f4f0657201efb851a", url: "https://trello.com/c/r64RFMG4/56-formation-des-phrases" })
-            const t = await Trello2.boards.getBoardCardsFilter({ id: "62c8815599d7756a150a56ff", filter: "closed" })
-            // await Trello2.cards.updateCardCheckItem({ idChecklist: "62fe01d59372e300df212dd8", idCheckItem: "62fe0eb93eedca70ac87f9fa", state: "complete", id: "62f93c42866a297e09ac948d", pos: "bottom" })
-            // console.log(t)
-            return res.json(t.length)
+            const wh = await Trello2.webhooks.createWebhook({
+                idModel: "62fe4a13d5b7b4004bd2b720",
+                // description: `connect this card (${cardData.url}) with (${cardData.url})`,
+                description: `connect 2 cards`,
+                callbackURL: `${URL}callback/connect2cardsv2`
+            })
+            res.json(wh)
         } catch (error) {
             res.send("error")
             console.log(error)
