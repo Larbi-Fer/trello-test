@@ -29,27 +29,6 @@
             width: 100%;
         }
 
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, .1);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient( 45deg, #555, #999);
-            border-radius: 30px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient( 45deg, #999, #555);
-        }
-
-        ::-webkit-scrollbar-thumb:active {
-            background: #777;
-        }
     </style>
 </head>
 <body>
@@ -86,7 +65,10 @@
 
             submit = async() => {
                 // res = await t.get("board", "shared", "incomplete")
-                axios.post(URL + "card/addcards", { cards: this.state.cards, title: document.getElementById("title").value })
+                this.t.get("board", "shared", "tasks").then(idList => {
+                    console.log("idList", idList)
+                    axios.post(URL + "card/addcards", { cards: this.state.cards, title: document.getElementById("title").value, idList })
+                })
             }
 
             render(){
@@ -110,6 +92,7 @@
                             })
                         }}
                         renderS={this.renderS}
+                        size={(plus) => this.t.sizeTo(document.querySelector("#content").clientHeight + (plus ? 74 : -50)).done()}
                         />
                         <button className="btn" onClick={this.submit}>Create</button>
                     </React.StrictMode>
@@ -124,7 +107,7 @@
             }
             addCard = () => {
                 this.props.addCard("name")
-                this.props.renderS()
+                this.props.size(true)
             }
 
             onChange = i => e => this.props.onChange(e.target.value, i)
@@ -135,7 +118,7 @@
                     return (
                         <div class="item">
                             <input type="text" onChange={this.onChange(i)} placeholder={"card name " + (i+1)} value={card.name} />
-                            <button class={"circal" + (isLast ? " green" : " red")} onClick={i == this.props.cards.length-1 ? this.addCard : () => {this.props.removeCard(i); this.props.renderS()}}>{ isLast ? "+" : "-" }</button>
+                            <button class={"circal" + (isLast ? " green" : " red")} onClick={i == this.props.cards.length-1 ? this.addCard : () => {this.props.removeCard(i); this.props.size()}}>{ isLast ? "+" : "-" }</button>
                         </div>
                     )
             })}

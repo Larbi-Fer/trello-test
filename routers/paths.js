@@ -1,7 +1,6 @@
 const password = ""
 const router = require('express').Router()
 const Trello = require("trello-node-api")("4c3f73efe799ce3be4134c6262af24c8", "97cb553962782fd607ad992fbc4112c713e1d1d5633026413832d9a1f959e10a")
-const Trellojs = require("trello.js")
 
 // google calendar
 const { google } = require("googleapis")
@@ -10,8 +9,13 @@ const { google } = require("googleapis")
 const TickTickAPI = require('ticktick-node-api')
 const tickAPI = new TickTickAPI()
 
+const Trellojs = require("trello.js")
+const Trello2 = new Trellojs.TrelloClient({ key: "4c3f73efe799ce3be4134c6262af24c8", token: "97cb553962782fd607ad992fbc4112c713e1d1d5633026413832d9a1f959e10a" })
+// Trello2 = Trello2("4c3f73efe799ce3be4134c6262af24c8", "97cb553962782fd607ad992fbc4112c713e1d1d5633026413832d9a1f959e10a")
+
 // const { OAuth2 } = google.auth
 const client_id = "750612677491-6519kichdcfia0ha0m4vreirqq52mh5r.apps.googleusercontent.com"
+const URL = "https://ai-way.herokuapp.com/"
 // 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
 // https://developers.google.com/oauthplayground/#step1&apisSelect=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar%2Chttps%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar.events&url=https%3A%2F%2F&content_type=application%2Fjson&http_method=GET&useDefaultOauthCred=checked&oauthEndpointSelect=Google&oauthAuthEndpointValue=https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fv2%2Fauth&oauthTokenEndpointValue=https%3A%2F%2Foauth2.googleapis.com%2Ftoken&includeCredentials=checked&accessTokenType=bearer&autoRefreshToken=unchecked&accessType=offline&prompt=consent&response_type=code&wrapLines=on
 
@@ -72,19 +76,32 @@ router.post("/addcards", async(req, res) => {
         const { cards, title, idList } = req.body
         let data = {
             name: title,
-            idList: "62c88181a3bf5650d2cfb818",
-            // due: new Date("07/12/2022"),
+            idList: idList,
             dueComplete: false,
         };
-        const result = await Trello.card.create(data);
-        console.log(result)
+        const result = await Trello2.cards.createCard(data);
+        const check = await Trello2.checklists.createChecklist({ idCard: result.id, name: "les steps" });
+        
         cards.forEach(async card => {
-            let data = {
-                idList: "62c88181a3bf5650d2cfb818",
-                name: card.name,
-                dueComplete: false,
-            };
-            response = await Trello.card.create(data);
+            try {
+                let data = {
+                    idList: idList,
+                    name: `${title} - ${card.name}`,
+                    dueComplete: false,
+                };
+                var cardData = await Trello2.cards.createCard(data);
+                const checkItem = await Trello2.checklists.createChecklistCheckItems({ id: check.id, name: cardData.url })
+                await Trello2.cards.createCardAttachment({ id: cardData.id, url: result.url, name: result.name })
+                const attch = await Trello2.cards.createCardAttachment({ id: result.id, url: cardData.url })
+                await Trello2.webhooks.createWebhook({
+                    idModel: cardData.id,
+                    description: `connect this card (${cardData.url}) with (${cardData.url})`,
+                    callbackURL: `${URL}callback/connect2cardsv1/${result.id}?checkItem=${checkItem.id}&attch=${attch.id}&checklist=${check.id}`
+                })
+            } catch (error) {
+                console.log(error)
+                return res.status(400).send("err")
+            }
         });
 
         res.status(200).json({ status: "ok" })
@@ -193,16 +210,18 @@ router.patch("/rearrangement", async(req, res) => {
                 idList2: idLists[0]
             },
         ]
-        const Trello = new Trellojs.TrelloClient({key: "4c3f73efe799ce3be4134c6262af24c8", token: "97cb553962782fd607ad992fbc4112c713e1d1d5633026413832d9a1f959e10a"})
-        /* try {
-            const t = await Trello.cards.createCardAttachment({ id: "62f93d4f4f0657201efb851a", url: "https://trello.com/c/r64RFMG4/56-formation-des-phrases" })
+        try {
+            // const t = await Trello.cards.createCardAttachment({ id: "62f93d4f4f0657201efb851a", url: "https://trello.com/c/r64RFMG4/56-formation-des-phrases" })
+            const t = await Trello2.checklists.getChecklist({ id: "62fe01d59372e300df212dd8", idCheckItem: "62fe0eb93eedca70ac87f9fa" })
+            // await Trello2.cards.updateCardCheckItem({ idChecklist: "62fe01d59372e300df212dd8", idCheckItem: "62fe0eb93eedca70ac87f9fa", state: "complete", id: "62f93c42866a297e09ac948d", pos: "bottom" })
             // console.log(t)
             return res.json(t)
         } catch (error) {
             res.send("error")
             console.log(error)
-        } */
-        const lists = Trello.lists
+        }
+        return
+        const lists = Trello2.lists
         idLists.forEach(async(idList, i) => {
             try {
                 const cards = await lists.getListCards({ id: idList })

@@ -2,7 +2,8 @@ const express = require('express')
 const cors = require("cors")
 const bodyParser = require('body-parser')
 
-const r = require('./paths.js');
+const cards = require('./routers/paths.js');
+const callback = require('./routers/callback.js');
 
 const app = express()
 require('dotenv').config();
@@ -12,7 +13,8 @@ app.use(cors())
 
 app.get("/", (req, res) => res.send("hello"))
 
-app.use('/card', r)
+app.use('/card', cards)
+app.use('/callback', callback)
 
 const PORT = process.env.PORT || 5000;
 
