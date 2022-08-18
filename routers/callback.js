@@ -22,11 +22,15 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
                 await Trello.cards.updateCardCheckItem({ idChecklist: checklist, idCheckItem: checkItem, state: !data.old.dueComplete, id, pos: "bottom" })
             }
             else if (data.old.due) {
+                console.log(1)
                 var attachments = await Trello.cards.getCardAttachments({ id })
                 attachments = attachments.filter(t => t.url.startsWith("https://trello.com/"))
+                console.log(2)
                 if (attachments.length === 0) return
+                console.log(3)
                 const dates = []
                 attachments.forEach(async at => {
+                    console.log(4)
                     try {
                         const idCard = at.url.split('/')[4]
                         const due = (await Trello.cards.getCard({ id: idCard })).due
@@ -36,9 +40,13 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
                         res.send("error")
                     }
                 });
+                console.log(5)
                 if (dates.length === 0) return await Trello.cards.updateCard({ id, due: null })
+                console.log(6)
                 const due = max(dates)
+                console.log(due)
                 await Trello.cards.updateCard({ id, due })
+                console.log(8)
                 /* const card = await Trello.cards.getCard({ id })
                 var due = card.due
                 if (card.badges.attachmentsByType.trello.card === 1) return await Trello.cards.updateCard({ id, due: data.card.due })
