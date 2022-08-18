@@ -33,6 +33,7 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
                         due ? dates.push(new Date(due)) : null
                     } catch (error) {
                         console.error(error)
+                        console.log("--------------------------")
                         res.send("error")
                     }
                 });
