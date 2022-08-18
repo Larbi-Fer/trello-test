@@ -21,13 +21,12 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
                 // const check = await Trello.checklists.getChecklist({ id: "" })
                 await Trello.cards.updateCardCheckItem({ idChecklist: checklist, idCheckItem: checkItem, state: !data.old.dueComplete, id, pos: "bottom" })
             }
+            else if (data.old.due) await Trello.cards.updateCard({ id, due: data.old.due })
         // delete card
         } else if (action.type === "deleteCard") {
             await Trello.cards.deleteCardChecklistItem({ id, idCheckItem: checkItem })
             await Trello.cards.deleteCardAttachment({ id, idAttachment: attch })
         // update date
-        } else if (action.type === "updateCard") {
-            if (data.old.due) await Trello.cards.updateCard({ id, due: data.old.due })
         } else if (action.type === "updateCheckItem") {
             // await Trello.cards.updateCard({ id, dueComplete: data.old.state === "incomplete" })
         }
