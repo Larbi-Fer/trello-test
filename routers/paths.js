@@ -81,6 +81,11 @@ router.post("/addcards", async(req, res) => {
         };
         const result = await Trello2.cards.createCard(data);
         const check = await Trello2.checklists.createChecklist({ idCard: result.id, name: "les steps" });
+        /* await Trello2.webhooks.createWebhook({
+            idModel: cardData.id,
+            description: `connect this card (${cardData.url}) with (${cardData.url})`,
+            callbackURL: `${URL}callback/connect2cardsv1/${result.id}?checkItem=${checkItem.id}&attch=${attch.id}&checklist=${check.id}`
+        }) */
         
         cards.forEach(async card => {
             try {
