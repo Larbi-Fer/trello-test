@@ -21,7 +21,28 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
                 // const check = await Trello.checklists.getChecklist({ id: "" })
                 await Trello.cards.updateCardCheckItem({ idChecklist: checklist, idCheckItem: checkItem, state: !data.old.dueComplete, id, pos: "bottom" })
             }
-            else if (data.old.due) await Trello.cards.updateCard({ id, due: data.card.due })
+            else if (data.old.due) {
+                /* var attachments = await Trello.cards.getCardAttachments({ id: "62fe1d05dc3a8d0017101e99" })
+                var attachments = attachments.filter(t => t.url.startsWith("https://trello.com/"))
+                const dates = []
+                attachments.forEach(async at => {
+                    try {
+                        const idCard = at.url.split('/')[4]
+                        const due = (await Trello.cards.getCard({ id: idCard })).due
+                        due ? dates.push(new Date(due)) : null
+                    } catch (error) {
+                        console.error(error)
+                        res.send("error")
+                    }
+                });
+                if (dates.length === 0) return */
+                if (!data.card.due) return
+                var due = (await Trello.cards.getCard({ id })).due
+                if (!due) return
+                due = new Date(due)
+                if (due > new Date(data.card.due)) return
+                await Trello.cards.updateCard({ id, due: data.card.due })
+            }
         // delete card
         } else if (action.type === "deleteCard") {
             await Trello.cards.deleteCardChecklistItem({ id, idCheckItem: checkItem })
@@ -38,5 +59,13 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
     }
 })
 
+
+/* function max(array) {
+    var valueMax = 0;
+    array.forEach(value => {
+        if (valueMax < value) valueMax = value
+    })
+    return valueMax
+} */
 
 module.exports = router
