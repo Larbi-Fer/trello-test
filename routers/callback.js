@@ -12,6 +12,7 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
     try {
         const id = req.params.id
         const action = req.body.action
+        console.log(action)
         const { checkItem, checklist, attch } = req.query
         const data = action.data
     
