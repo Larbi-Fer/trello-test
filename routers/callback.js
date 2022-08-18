@@ -22,8 +22,8 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
                 await Trello.cards.updateCardCheckItem({ idChecklist: checklist, idCheckItem: checkItem, state: !data.old.dueComplete, id, pos: "bottom" })
             }
             else if (data.old.due) {
-                var attachments = await Trello.cards.getCardAttachments({ id: "62fe1d05dc3a8d0017101e99" })
-                var attachments = attachments.filter(t => t.url.startsWith("https://trello.com/"))
+                var attachments = await Trello.cards.getCardAttachments({ id })
+                attachments = attachments.filter(t => t.url.startsWith("https://trello.com/"))
                 if (attachments.length === 0) return
                 const dates = []
                 attachments.forEach(async at => {
@@ -33,7 +33,6 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
                         due ? dates.push(new Date(due)) : null
                     } catch (error) {
                         console.error(error)
-                        console.log("--------------------------")
                         res.send("error")
                     }
                 });
@@ -59,6 +58,7 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
         res.send("ok")
     } catch (error) {
         console.error(error)
+        console.log("--------------------------")
         res.send("error")
     }
 })
