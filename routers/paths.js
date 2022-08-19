@@ -176,6 +176,7 @@ router.get('/webhook', (req, res) => {
 })
 router.post('/webhook', (req, res) => {
     const action = req.body.action
+    console.log(action)
     if (action.type === "updateCard") {
         if (action.data.old.dueComplete === false) {
             let data = { pos: 'bottom' }
@@ -184,6 +185,7 @@ router.post('/webhook', (req, res) => {
         }
         return res.status(200).send(200)
     }
+    res.send("this action not update card")
 })
 
 router.patch("/rearrangement", async(req, res) => {
@@ -242,7 +244,7 @@ router.patch("/rearrangement", async(req, res) => {
                     }
                     const data = { idList: result ? conditions[i].idList : conditions[i].idList2, id: card.id }
                     try {
-                        await Trello.cards.updateCard(data)
+                        await Trello2.cards.updateCard(data)
                     } catch (error) {
                         return res.json({ error: "err", card: card.name })
                     }
