@@ -174,13 +174,17 @@ router.get('/webhook', (req, res) => {
 
     return res.status(200).json({ status: "ok" })
 })
-router.post('/webhook', (req, res) => {
+router.post('/webhook', async(req, res) => {
     const action = req.body.action
-    console.log(action)
     if (action.type === "updateCard") {
         if (action.data.old.dueComplete === false) {
             let data = { pos: 'bottom' }
-            Trello.card.update(action.data.card.id, data).then(response => console.log(response)).catch(err => console.error(err))
+            try {
+                await Trello.card.update(action.data.card.id, data)
+            } catch (error) {
+                console.error(error)
+                return res.send('error')
+            }
             return res.json({ status: "card completd" })
         }
         return res.status(200).send(200)
