@@ -62,7 +62,7 @@ router.patch("/rearrangement", async(req, res) => {
             console.log(error)
         }
         return
-        /* const lists = Trello.lists
+        const lists = Trello.lists
         idLists.forEach(async(idList, i) => {
             try {
                 const cards = await lists.getListCards({ id: idList })
@@ -84,7 +84,7 @@ router.patch("/rearrangement", async(req, res) => {
             } catch (error) {
                 return res.json({ error: "error", index: i })
             }
-        }) */
+        })
 
         // جلب مهام آخر 3 أيام
         secondaryBoards.forEach(async id => {
