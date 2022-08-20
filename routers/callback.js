@@ -109,26 +109,29 @@ router.get('/addwebhook/:id', async(req, res) => {
 
 router.post("/connect2cards/:id/:wid", async(req, res) => {
     const { id, wid } = req.params
-    console.log(req.body)
+    // console.log(req.body)
     const idCard = req.body.action.card.id
     try {
         // desactive webhook in the card
+        console.log(1)
         await Trello.webhooks.updateWebhook({ id: wid, active: false })
-
+        console.log(2)
+        
         // get Card data
-        const data = await Trello.cards.getCard({ id: idCard })
+        /* const data = await Trello.cards.getCard({ id: idCard })
         data.idLabels = []
         data.idBoard = null
         data.idChecklists = []
         // update card
-        await Trello.cards.updateCard({ ...data, id })
-
+        await Trello.cards.updateCard({ ...data, id }) */
+        
         // active webhook in the card
         await Trello.webhooks.updateWebhook({ id: wid, active: true })
+        console.log(3)
 
         res.send("complete")
     } catch (error) {
-        
+        console.error(error)
     }
 })
 
