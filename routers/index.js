@@ -5,7 +5,7 @@ const Trello = new Trellojs.TrelloClient({ key: "4c3f73efe799ce3be4134c6262af24c
 const primaryBoard = "62ff565b4bc60f00af2cc07e"
 const secondaryBoards = [ "", "" ]
 
-const URL = require("../main.js").URL
+const URL = "https://ai-way.herokuapp.com/"
 
 router.patch("/rearrangement", async(req, res) => {
     try {
@@ -88,7 +88,7 @@ router.patch("/rearrangement", async(req, res) => {
         secondaryBoards.forEach(async id => {
             const cards = await Trello.boards.getBoardCards({ id })
 
-            cards.forEach(card => {
+            cards.forEach(async card => {
                 if (!card.badges.start) return
                 const date = new Date(card.badges.start)
                 var start = new Date()
