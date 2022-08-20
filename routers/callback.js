@@ -110,7 +110,7 @@ router.get('/addwebhook/:id', async(req, res) => {
 router.post("/connect2cards/:id/:wid", async(req, res) => {
     const { id, wid } = req.params
     const { action } = req.body
-    console.log(action)
+    console.log(action.display.entities)
     // const idCard = req.body.action.card.id
     try {
         // desactive webhook in the card
@@ -124,10 +124,92 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
         // active webhook in the card
         await Trello.webhooks.updateWebhook({ id: wid, active: true })
 
+        // updateCheckItemStateOnCard, deleteCheckItem
+
         res.send("complete")
     } catch (error) {
         console.error(error)
     }
 })
+/* 
+deleteCheckItem = {
+    board: {
+      id: '62ff55a6507edf006375a4a6',
+      name: 'langages de programmation',
+      shortLink: 'ht6995ez'
+    },
+    checklist: { id: '6300b44fdcfdd7003e1c7b9f', name: 'Checklist' },
+    card: {
+      id: '6300b429f8450d008d173709',
+      name: 'face detaction',
+      idShort: 1,
+      shortLink: 'jbktxLeL'
+    },
+    checkItem: {
+      id: '6300b4510446f6005a7c9368',
+      name: '1',
+      state: 'complete',
+      textData: [Object]
+    }
+}
+
+createCheckItem = {
+    card: {
+      id: '6300b429f8450d008d173709',
+      name: 'face detaction',
+      idShort: 1,
+      shortLink: 'jbktxLeL'
+    },
+    board: {
+      id: '62ff55a6507edf006375a4a6',
+      name: 'langages de programmation',
+      shortLink: 'ht6995ez'
+    },
+    checklist: { id: '6300b44fdcfdd7003e1c7b9f', name: 'Checklist' },
+    checkItem: {
+      id: '6300c777b67b2e00ff399b2b',
+      name: '1',
+      state: 'incomplete',
+      textData: [Object]
+    }
+}
+
+updateCheckItemStateOnCard = {
+    board: {
+      id: '62ff55a6507edf006375a4a6',
+      name: 'langages de programmation',
+      shortLink: 'ht6995ez'
+    },
+    card: {
+      id: '6300b429f8450d008d173709',
+      name: 'face detaction',
+      idShort: 1,
+      shortLink: 'jbktxLeL'
+    },
+    checklist: { id: '6300b44fdcfdd7003e1c7b9f', name: 'Checklist' },
+    checkItem: {
+      id: '6300c777b67b2e00ff399b2b',
+      name: '1',
+      state: 'complete',
+      textData: [Object]
+    }
+}
+
+removeChecklistFromCard = {
+    card: {
+      id: '6300b429f8450d008d173709',
+      name: 'face detaction',
+      idShort: 1,
+      shortLink: 'jbktxLeL'
+    },
+    board: {
+      id: '62ff55a6507edf006375a4a6',
+      name: 'langages de programmation',
+      shortLink: 'ht6995ez'
+    },
+    checklist: { id: '6300b44fdcfdd7003e1c7b9f', name: 'Checklist' }
+}, */
+// addChecklistToCard, updateChecklist
+    
 
 module.exports = router
