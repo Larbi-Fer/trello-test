@@ -3,7 +3,7 @@ const Trellojs = require("trello.js")
 const Trello = new Trellojs.TrelloClient({ key: "4c3f73efe799ce3be4134c6262af24c8", token: "97cb553962782fd607ad992fbc4112c713e1d1d5633026413832d9a1f959e10a" })
 
 const primaryBoard = "62ff565b4bc60f00af2cc07e"
-const secondaryBoards = [ "", "" ]
+const secondaryBoards = [ "62ff55a6507edf006375a4a6", "62ff566a299282008d42db7e" ]
 
 const URL = "https://ai-way.herokuapp.com/"
 
@@ -52,14 +52,16 @@ router.patch("/rearrangement", async(req, res) => {
                 idList2: idLists[0]
             },
         ]
-        /* try {
-            const wh = await Trello.cards.getCard({ id: "62ffe05601958800c4180b02" })
+        try {
+            // const wh = await Trello.cards.updateCard({ id: "6300b429f8450d008d173709", start: new Date("2022-08-19") })
+            const wh = await Trello.cards.createCardChecklist({ id: "6300b429f8450d008d173709" })
+            // await Trello.checklists.createChecklist({ id: "6300b429f8450d008d173709" })
             res.json(wh)
         } catch (error) {
             res.send("error")
             console.log(error)
         }
-        return */
+        return
         /* const lists = Trello.lists
         idLists.forEach(async(idList, i) => {
             try {
@@ -91,15 +93,18 @@ router.patch("/rearrangement", async(req, res) => {
             cards.forEach(async card => {
                 if (!card.badges.start) return
                 const date = new Date(card.badges.start)
+
                 var start = new Date()
-                start.setDate( start.getDate() + 2 )
                 start.setHours(00, 00, 00, 00)
+                start.setDate( start.getDate() + 2 )
                 
                 var end = new Date()
-                start.setDate( start.getDate() + 2 )
+                end.setDate( end.getDate() + 2 )
                 end.setHours(23, 59, 59, 99)
-
+                console.log(date > start && date < end)
                 if (date > start && date < end) {
+                    // return res.json(card)
+                    card.idLabels = []
                     const card2 = await Trello.cards.createCard({
                         ...card,
                         idList: idLists[4],
