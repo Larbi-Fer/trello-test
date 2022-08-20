@@ -109,8 +109,8 @@ router.get('/addwebhook/:id', async(req, res) => {
 
 router.post("/connect2cards/:id/:wid", async(req, res) => {
     const { id, wid } = req.params
-    // console.log(req.body)
-    const idCard = req.body.action.card.id
+    console.log(req.body.action)
+    // const idCard = req.body.action.card.id
     try {
         // desactive webhook in the card
         console.log(1)
