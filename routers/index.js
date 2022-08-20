@@ -52,17 +52,17 @@ router.patch("/rearrangement", async(req, res) => {
                 idList2: idLists[0]
             },
         ]
-        try {
+        /* try {
             // const wh = await Trello.cards.updateCard({ id: "6300b429f8450d008d173709", start: new Date("2022-08-19") })
-            const wh = await Trello.cards.createCardChecklist({ id: "6300b429f8450d008d173709" })
+            const wh = await Trello.cards.getCardChecklists({ id: "6300b429f8450d008d173709" })
             // await Trello.checklists.createChecklist({ id: "6300b429f8450d008d173709" })
             res.json(wh)
         } catch (error) {
             res.send("error")
             console.log(error)
         }
-        return
-        /* const lists = Trello.lists
+        return */
+        const lists = Trello.lists
         idLists.forEach(async(idList, i) => {
             try {
                 const cards = await lists.getListCards({ id: idList })
@@ -84,10 +84,10 @@ router.patch("/rearrangement", async(req, res) => {
             } catch (error) {
                 return res.json({ error: "error", index: i })
             }
-        }) */
+        })
 
         // جلب مهام آخر 3 أيام
-        secondaryBoards.forEach(async id => {
+        /* secondaryBoards.forEach(async id => {
             const cards = await Trello.boards.getBoardCards({ id })
 
             cards.forEach(async card => {
@@ -122,7 +122,7 @@ router.patch("/rearrangement", async(req, res) => {
                     await Trello.webhooks.updateWebhook({ id: wb.id, callbackURL: `${URL}callback/connect2cards/${card2.id}/${wb2.id}` })
                 }
             });
-        })
+        }) */
     return res.send("ok")
     } catch (error) {
         

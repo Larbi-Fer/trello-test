@@ -110,20 +110,41 @@ router.get('/addwebhook/:id', async(req, res) => {
 router.post("/connect2cards/:id/:wid", async(req, res) => {
     const { id, wid } = req.params
     const { action } = req.body
-    console.log(action.display.entities)
+    // console.log(action.display.entities)
     // const idCard = req.body.action.card.id
     try {
         // desactive webhook in the card
-        await Trello.webhooks.updateWebhook({ id: wid, active: false })
+        if (action.type === "updateCard") {
+            await Trello.webhooks.updateWebhook({ id: wid, active: false })
 
-        // get Card data
-        // const data = await Trello.cards.getCard({ id: idCard })
-        // update card
-        await Trello.cards.updateCard({ ...action.data.card, id })
+            // get Card data
+            // const data = await Trello.cards.getCard({ id: idCard })
+            // update card
+            await Trello.cards.updateCard({ ...action.data.card, id })
 
-        // active webhook in the card
-        await Trello.webhooks.updateWebhook({ id: wid, active: true })
-
+            // active webhook in the card
+            await Trello.webhooks.updateWebhook({ id: wid, active: true })
+        } else if ( action.type.search("CheckItem") !== -1 ) {
+            var type;
+            var state;
+            switch (action.type) {
+                case "createCheckItem":
+                    type = "createChecklistCheckItems"
+                    state = "checklists"
+                    action.data.checkItem.checked = action.data.checkItem.state === "complete" ? true : false
+                    break;
+                
+                case "updateCheckItemStateOnCard":
+                    type = "updateCardCheckItem"
+                    state = "cards"
+                    // await Trello.cards.getCardChecklists({})
+                    break
+            
+                default:
+                    break;
+            }
+            await Trello.checklists.createChecklistCheckItems( {  } )
+        }
         // updateCheckItemStateOnCard, deleteCheckItem
 
         res.send("complete")
