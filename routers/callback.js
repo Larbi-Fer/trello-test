@@ -124,6 +124,7 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
         data.idLabels = []
         data.idBoard = null
         data.idChecklists = []
+        console.log(data.dueComplete)
         // update card
         await Trello.cards.updateCard({ ...data, id })
         
