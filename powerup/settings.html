@@ -44,9 +44,14 @@
             t.sizeTo("#content").done()
         })
 
-        t.getAll("board", "shared").then(tasks => {
-            tasks = tasks.board.shared
-            tasks = [tasks.day, tasks.week, tasks.tasks, tasks.complete, tasks.incomplete]
+        t.getAll("board", "shared").then(async tasks => {
+            if (t.board && t.board.shared) {
+                tasks = tasks.board.shared
+                tasks = [tasks.day, tasks.week, tasks.tasks, tasks.complete, tasks.incomplete]
+            }
+            else {
+                tasks = [ null, null, null, null, null ]
+            }
             t.lists("name", "id").then(lists => {
                 i = 0
                 types.forEach(type => {
@@ -71,69 +76,6 @@
             });
             return t.set("board", "shared", 'day', lists[0]).then(() => t.set("board", "shared", 'week', lists[1]).then(() => t.set("board", "shared", 'tasks', lists[2]).then(() => t.set("board", "shared", 'complete', lists[3]).then(() => t.set("board", "shared", 'incomplete', lists[4]).then(() => t.alert({ message: "saved", duration: 4 }))))))
             // return t.set("board", "shared", types, lists).then(() => t.alert({ message: "saved", duration: 4 }))
-         })
-
-         document.getElementById("test").addEventListener("click", () => {
-            const cardEl = document.createElement("trello-card");
-
-            // Determines whether colorblind labels should be used or not. Default is true.
-            cardEl.colorblind = false;
-
-            // Determines whether to show text on labels. Default is true.
-            cardEl.labeltext = true;
-
-            cardEl.card = {
-                id: "5b907e0e39cccd595f1c8bfa",
-                name: "Name of card", // Required
-                url: "https://trello.com/c/something", // Required
-                closed: false,
-                idAttachmentCover: null,
-                badges: {
-                    attachmentsByType: {
-                    trello: { board: 1, card: 0 },
-                    },
-                    location: false,
-                    votes: 0,
-                    viewingMemberVoted: false,
-                    subscribed: true,
-                    checkItems: 5,
-                    checkItemsChecked: 4,
-                    comments: 3,
-                    attachments: 7,
-                    description: true,
-                    due: null,
-                    dueComplete: false,
-                },
-                labels: [
-                    {
-                    id: "5b8fd55d451e437262fe7aff",
-                    idBoard: "599dbf8d693c9eeaed69ca09",
-                    name: "bug",
-                    color: "red",
-                    },
-                ],
-                stickers: [],
-                attachments: [], // Only need attachment for idAttachmentCover
-                members: [
-                    {
-                    id: "556c8537a1928ba745504dd8",
-                    avatarHash: "0b48c7057767cca8f339109b27a064d7",
-                    fullName: "Matt Cowan",
-                    username: "mattcowan",
-                    initials: "MC",
-                    },
-                ],
-                customFields: [],
-                customFieldItems: [],
-            };
-
-            // There is a custom event that is fired when a user clicks on the labels that
-            // you can listen and respond to.
-            cardEl.addEventListener("labelTextChanged", (e) => {
-            console.log("labeltext property is now", e.detail.labeltext);
-            });
-
-            document.body.appendChild(cardEl);
          })
 
     </script>

@@ -15,7 +15,7 @@ const Trello2 = new Trellojs.TrelloClient({ key: "4c3f73efe799ce3be4134c6262af24
 
 // const { OAuth2 } = google.auth
 const client_id = "750612677491-6519kichdcfia0ha0m4vreirqq52mh5r.apps.googleusercontent.com"
-const URL = "https://ai-way.herokuapp.com/"
+const URL = require('../main.js').URL
 // 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
 // https://developers.google.com/oauthplayground/#step1&apisSelect=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar%2Chttps%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar.events&url=https%3A%2F%2F&content_type=application%2Fjson&http_method=GET&useDefaultOauthCred=checked&oauthEndpointSelect=Google&oauthAuthEndpointValue=https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fv2%2Fauth&oauthTokenEndpointValue=https%3A%2F%2Foauth2.googleapis.com%2Ftoken&includeCredentials=checked&accessTokenType=bearer&autoRefreshToken=unchecked&accessType=offline&prompt=consent&response_type=code&wrapLines=on
 
@@ -192,97 +192,5 @@ router.post('/webhook', async(req, res) => {
     res.send("this action not update card")
 })
 
-router.patch("/rearrangement", async(req, res) => {
-    try {
-        const idLists = ['62c88181a3bf5650d2cfb818', '62c89a0d6f727002afc941c6', '62cf2597103c6b53861cc939', '62c88169436e171953dc1dba', '62c881766611d95d455082fc']
-        const conditions = [
-            {
-                callback: () => false
-            },
-            {
-                callback: () => true,
-                archive: true
-            },
-            {
-                callback: card => {
-                    const date = new Date(card.badges.start).getDate()
-                    const day = new Date().getDate()
-                    return day <= date && date <= (day + 7)
-                },
-                idList: idLists[3]
-            },
-            {
-                callback: card => new Date(card.badges.start).getDate() === new Date().getDate(),
-                idList: idLists[4]
-            },
-            {
-                callback: card => card.dueComplete ? true : (new Date(card.due) < new Date() ? null : false),
-                idList: idLists[1],
-                idList2: idLists[0]
-            },
-        ]
-        /* try {
-            const wh = await Trello2.webhooks.createWebhook({
-                idModel: "62fe4a13d5b7b4004bd2b720",
-                // description: `connect this card (${cardData.url}) with (${cardData.url})`,
-                description: `connect 2 cards`,
-                callbackURL: `${URL}callback/connect2cardsv2`
-            })
-            res.json(wh)
-        } catch (error) {
-            res.send("error")
-            console.log(error)
-        }
-        return */
-        const lists = Trello2.lists
-        idLists.forEach(async(idList, i) => {
-            try {
-                const cards = await lists.getListCards({ id: idList })
-                cards.forEach(async card => {
-                    const result = conditions[i].callback(card)
-                    if (!result && !conditions[i].idList2) return
-                    if (result === false) return
-                    if (conditions[i].archive) {
-                        lists.archiveAllCardsInList({ id: idList })
-                        return
-                    }
-                    const data = { idList: result ? conditions[i].idList : conditions[i].idList2, id: card.id }
-                    try {
-                        await Trello2.cards.updateCard(data)
-                    } catch (error) {
-                        return res.json({ error: "err", card: card.name })
-                    }
-                })
-            } catch (error) {
-                return res.json({ error: "error", index: i })
-            }
-        })
-    return res.send("ok")
-        // const list = await Trello.list.search(idLists[0])
-        // console.log(list)
-    } catch (error) {
-        
-    }
-})
-
-router.get('/addwebhook', async(req, res) => {
-    let data = {
-        description: 'Webhook description',
-        callbackURL: 'https://ai-way.herokuapp.com/card/webhook', // REQUIRED
-        idModel: '62c8815599d7756a150a56ff', // REQUIRED
-        // active: false
-    };
-    let response;
-    try {
-        response = await Trello.webhook.create(data);
-    } catch (error) {
-        if (error) {
-            console.log('error ', error);
-            return res.send("error")
-        }
-    }
-    res.send("OK")
-    console.log('response', response);
-})
 
 module.exports = router

@@ -13,7 +13,7 @@
   <!-- Axios -->
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script>
-    URL = "https://ai-way.herokuapp.com/"
+    const URL = "https://ai-way.herokuapp.com/"
     TrelloPowerUp.initialize({
       'card-buttons': function (t, options) {
         return [
@@ -70,6 +70,9 @@
                     url: "./addCards.html",
                     height: 140,
                   })
+                }, {
+                  text: "copy id board",
+                  callback: (t, opts) => t.board("id").then(({ id }) => /* navigator.clipboard.writeText( id ) */alert(id) || t.closePopup())
                 }]
                 /* url: './addCards.html',
                 height: 184,
@@ -100,7 +103,7 @@
           t.lists("id", "name").then(listsp => lists = listsp)
           return t.list("all")
           .then(async list => {
-            console.log("list", list)
+            /* console.log("list", list)
             var listC = [null, null]
             var listInC = [null, null]
             s = await t.getAll("board", "shared")
@@ -112,15 +115,14 @@
             if (s.incomplete) {
               listInC[0] = s.incomplete
               listInC[1] = lists.find(v => v.id == s.incomplete).name
-            }
+            } */
             var returnList = [{
                 text: "Get List ID",
                 callback: function (t) {
-                console.log(list)
-                alert(`list name: ${list.name}, ID: "${list.id}"`)
+                  alert(`list name: ${list.name}, ID: "${list.id}"`)
                 }
             }];
-            console.log(listC)
+            /* console.log(listC)
             if (list.id != listC[0] || list.id != listInC[0]) {
               returnList.push( {
                 text: `move completed cards to "${listC[1]}"`,
@@ -144,7 +146,7 @@
               })
             }
             console.log("-----")
-            console.log(listC, listInC)
+            console.log(listC, listInC) */
             return returnList
           });
       },
@@ -186,6 +188,9 @@
             }
           }];
         });
+      },
+      'on-enable': (t, opts) => {
+        t.board("id").then(({ id }) => axios.get(URL + "callback/addwebhook/" + id))
       }
     })
   </script>

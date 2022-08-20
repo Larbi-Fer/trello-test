@@ -4,7 +4,7 @@ const Trellojs = require("trello.js")
 const Trello = new Trellojs.TrelloClient({ key: "4c3f73efe799ce3be4134c6262af24c8", token: "97cb553962782fd607ad992fbc4112c713e1d1d5633026413832d9a1f959e10a" })
 
 
-router.get(["/connect2cardsv1/:id", "/connect2cardsv2"], (req, res) => {
+router.get(["/connect2cardsv1/:id", "/connect2cardsv2", "/connect2cards/:id/:wid"], (req, res) => {
     res.status(200).send("this webhook is work")
 })
 
@@ -84,6 +84,47 @@ router.post("/connect2cardsv2", async(req, res) => {
     } catch (error) {
         console.error(error)
         return res.status(400).send("error")
+    }
+})
+
+router.get('/addwebhook/:id', async(req, res) => {
+    let data = {
+        description: 'Webhook board',
+        callbackURL: 'https://ai-way.herokuapp.com/card/webhook',
+        idModel: req.params.id,
+        // active: false
+    };
+    let response;
+    try {
+        response = await Trello.webhook.create(data);
+    } catch (error) {
+        if (error) {
+            console.log('error ', error);
+            return res.send("error")
+        }
+    }
+    res.send("OK")
+    console.log('response', response);
+})
+
+router.post("/connect2cards/:id/:wid", async(req, res) => {
+    const { id, wid } = req.params
+    const idCard = req.body.action.card.id
+    try {
+        // desactive webhook in the card
+        await Trello.webhooks.updateWebhook({ id: wid, active: false })
+
+        // get Card data
+        const data = await Trello.cards.getCard({ id: idCard })
+        // update card
+        await Trello.cards.updateCard({ ...data, id })
+
+        // active webhook in the card
+        await Trello.webhooks.updateWebhook({ id: wid, active: true })
+
+        res.send("complete")
+    } catch (error) {
+        
     }
 })
 
