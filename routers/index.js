@@ -125,7 +125,7 @@ router.patch("/rearrangement", async(req, res) => {
         })
     return res.send("ok")
     } catch (error) {
-        
+        console.error(error)
     }
 })
 
