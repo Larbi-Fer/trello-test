@@ -115,7 +115,7 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
     try {
         // desactive webhook in the card
         await Trello.webhooks.updateWebhook({ id: wid, active: false })
-
+        console.log("start")
         if (action.type === "updateCard") {
 
             // get Card data
