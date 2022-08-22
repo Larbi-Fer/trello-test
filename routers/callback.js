@@ -133,17 +133,25 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
                     state = "checklists"
                     action.data.checkItem.checked = action.data.checkItem.state === "complete" ? true : false
                     break;
-                
+
                 case "updateCheckItemStateOnCard":
                     type = "updateCardCheckItem"
                     state = "cards"
-                    // await Trello.cards.getCardChecklists({})
+                    const idCheck = (await Trello.cards.getCardChecklists({ id })).find(c => c.name === action.data.checklist.name).checkItems.find(ci => ci.name === action.data.checkItem.name).id
+                    console.log("idCheck", idCheck)
+                    action.data.checkItem.id = idCheck
                     break
-            
-                default:
+
+                    case "deleteCheckItem":
+                    type = "updateCardCheckItem"
+                    state = "checklists"
+                    action.data.checkItem.id = (await Trello.cards.getCardChecklists({ id })).find(c => c.name === action.data.checklist.name).checkItems.find(ci => ci.name === action.data.checkItem.name).id
                     break;
+
+                default:
+                    return;
             }
-            await Trello.checklists.createChecklistCheckItems( {  } )
+            await Trello[state][type]( action.data.checkItem )
         }
         // updateCheckItemStateOnCard, deleteCheckItem
 

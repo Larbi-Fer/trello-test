@@ -52,7 +52,7 @@ router.patch("/rearrangement", async(req, res) => {
                 idList2: idLists[0]
             },
         ]
-        /* try {
+        try {
             // const wh = await Trello.cards.updateCard({ id: "6300b429f8450d008d173709", start: new Date("2022-08-19") })
             const wh = await Trello.cards.getCardChecklists({ id: "6300b429f8450d008d173709" })
             // await Trello.checklists.createChecklist({ id: "6300b429f8450d008d173709" })
@@ -61,7 +61,7 @@ router.patch("/rearrangement", async(req, res) => {
             res.send("error")
             console.log(error)
         }
-        return */
+        return
         const lists = Trello.lists
         idLists.forEach(async(idList, i) => {
             try {
