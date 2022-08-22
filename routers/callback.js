@@ -114,16 +114,14 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
     // const idCard = req.body.action.card.id
     try {
         // desactive webhook in the card
+        await Trello.webhooks.updateWebhook({ id: wid, active: false })
+
         if (action.type === "updateCard") {
-            await Trello.webhooks.updateWebhook({ id: wid, active: false })
 
             // get Card data
             // const data = await Trello.cards.getCard({ id: idCard })
             // update card
             await Trello.cards.updateCard({ ...action.data.card, id })
-
-            // active webhook in the card
-            await Trello.webhooks.updateWebhook({ id: wid, active: true })
         } else if ( action.type.search("CheckItem") !== -1 ) {
             var type;
             var state;
@@ -137,23 +135,24 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
                 case "updateCheckItemStateOnCard":
                     type = "updateCardCheckItem"
                     state = "cards"
-                    const idCheck = (await Trello.cards.getCardChecklists({ id })).find(c => c.name === action.data.checklist.name).checkItems.find(ci => ci.name === action.data.checkItem.name).id
-                    console.log("idCheck", idCheck)
-                    action.data.checkItem.id = idCheck
-                    break
+                    action.data.checkItem.idCheckItem = (await Trello.cards.getCardChecklists({ id })).find(c => c.name === action.data.checklist.name).checkItems.find(ci => ci.name === action.data.checkItem.name).id
+                    // console.log(action.data.checkItem)
+                    break;
 
                     case "deleteCheckItem":
                     type = "updateCardCheckItem"
                     state = "checklists"
-                    action.data.checkItem.id = (await Trello.cards.getCardChecklists({ id })).find(c => c.name === action.data.checklist.name).checkItems.find(ci => ci.name === action.data.checkItem.name).id
+                    action.data.checkItem.idCheckItem = (await Trello.cards.getCardChecklists({ id })).find(c => c.name === action.data.checklist.name).checkItems.find(ci => ci.name === action.data.checkItem.name).id
                     break;
 
                 default:
                     return;
             }
-            await Trello[state][type]( action.data.checkItem )
+            await Trello[state][type]( { ...action.data.checkItem, id } )
         }
-        // updateCheckItemStateOnCard, deleteCheckItem
+        
+        // active webhook in the card
+        await Trello.webhooks.updateWebhook({ id: wid, active: true })
 
         res.send("complete")
     } catch (error) {
