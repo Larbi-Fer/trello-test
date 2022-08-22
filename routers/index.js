@@ -52,16 +52,16 @@ router.patch("/rearrangement", async(req, res) => {
                 idList2: idLists[0]
             },
         ]
-        try {
+        /* try {
             // const wh = await Trello.cards.updateCard({ id: "6300b429f8450d008d173709", start: new Date("2022-08-19") })
-            const wh = await Trello.cards.updateCardCheckItem({ state: true, idCheckItem: "63035cad4a75a1009bb9a1c9" })
+            const wh = await Trello.cards.getCardChecklists({ id: "6300b429f8450d008d173709" })
             // await Trello.checklists.createChecklist({ id: "6300b429f8450d008d173709" })
             res.json(wh)
         } catch (error) {
             res.send("error")
             console.log(error)
         }
-        return
+        return */
         const lists = Trello.lists
         idLists.forEach(async(idList, i) => {
             try {
@@ -87,7 +87,7 @@ router.patch("/rearrangement", async(req, res) => {
         })
 
         // جلب مهام آخر 3 أيام
-        /* secondaryBoards.forEach(async id => {
+        secondaryBoards.forEach(async id => {
             const cards = await Trello.boards.getBoardCards({ id })
 
             cards.forEach(async card => {
@@ -101,7 +101,7 @@ router.patch("/rearrangement", async(req, res) => {
                 var end = new Date()
                 end.setDate( end.getDate() + 2 )
                 end.setHours(23, 59, 59, 99)
-                console.log(date > start && date < end)
+
                 if (date > start && date < end) {
                     // return res.json(card)
                     card.idLabels = []
@@ -122,7 +122,7 @@ router.patch("/rearrangement", async(req, res) => {
                     await Trello.webhooks.updateWebhook({ id: wb.id, callbackURL: `${URL}callback/connect2cards/${card2.id}/${wb2.id}` })
                 }
             });
-        }) */
+        })
     return res.send("ok")
     } catch (error) {
         
