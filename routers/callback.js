@@ -184,7 +184,7 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
 
         res.send("complete")
     } catch (error) {
-        console.error(errors)
+        console.error(error)
     }
 })
 
