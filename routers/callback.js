@@ -112,6 +112,7 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
     const { action } = req.body
     // console.log(action.display.entities)
     // const idCard = req.body.action.card.id
+    console.log(action.type)
     try {
         // desactive webhook in the card
         await Trello.webhooks.updateWebhook({ id: wid, active: false })
