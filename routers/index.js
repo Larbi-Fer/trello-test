@@ -54,7 +54,7 @@ router.patch("/rearrangement", async(req, res) => {
         ]
         /* try {
             // const wh = await Trello.cards.updateCard({ id: "6300b429f8450d008d173709", start: new Date("2022-08-19") })
-            const wh = await Trello.cards.getCardChecklists({ idCard: "6309cc393389841339d7b404" })
+            const wh = await Trello.cards.getCardAttachments({ id: "6309eb54d71291009470f9b0"})
             // await Trello.checklists.createChecklist({ id: "6300b429f8450d008d173709" })
             res.json(wh)
         } catch (error) {
