@@ -4,8 +4,8 @@ const Trello = new Trellojs.TrelloClient({ key: "4c3f73efe799ce3be4134c6262af24c
 
 const primaryBoard = "62ff565b4bc60f00af2cc07e"
 const secondaryBoards = [ "62ff55a6507edf006375a4a6", "62ff566a299282008d42db7e" ]
-
-const URL = "https://ai-way.herokuapp.com/"
+require("dotenv").config()
+const URL = process.env.URL
 
 router.patch("/rearrangement", async(req, res) => {
     try {
@@ -54,7 +54,7 @@ router.patch("/rearrangement", async(req, res) => {
         ]
         /* try {
             // const wh = await Trello.cards.updateCard({ id: "6300b429f8450d008d173709", start: new Date("2022-08-19") })
-            const wh = await Trello.cards.getCardChecklists({ id: "6300b429f8450d008d173709" })
+            const wh = await Trello.cards.getCardChecklists({ idCard: "6309cc393389841339d7b404" })
             // await Trello.checklists.createChecklist({ id: "6300b429f8450d008d173709" })
             res.json(wh)
         } catch (error) {
@@ -107,8 +107,12 @@ router.patch("/rearrangement", async(req, res) => {
                     card.idLabels = []
                     const card2 = await Trello.cards.createCard({
                         ...card,
-                        idList: idLists[4],
+                        idList: idLists[3],
                     })
+                    // connect cards
+                    await Trello.cards.createCardAttachment({ id: card.id, url: card2.shortUrl })
+                    await Trello.cards.createCardAttachment({ id: card2.id, url: card.shortUrl })
+
                     const wb = await Trello.webhooks.createWebhook({
                         idModel: card.id,
                         description: "connect this card with " + card2.shortUrl,

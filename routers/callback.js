@@ -141,6 +141,7 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
                     state = "cards"
                     action.data.checkItem.idCheckItem = (await getCheck(id, action.data.checklist.name)).checkItems.find(ci => ci.name === action.data.checkItem.name).id
                     action.data.checkItem.id = id
+                    console.log(action.data.checkItem)
                     // console.log(action.data.checkItem)
                     break;
 
@@ -161,12 +162,13 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
             switch (action.type) {
                 case "addChecklistToCard":
                     type = "createChecklist"
-                    action.data.idCard = id
+                    action.data.checklist.idCard = id
+                    console.log(action.data.checklist)
                     break;
 
                 case "updateChecklist":
                     type = "updateChecklist"
-                    action.data.checklist.id = (await getCheck(id, action.data.checklist.name)).id
+                    action.data.checklist.id = (await getCheck(id, action.data.old.name ?? action.data.checklist.name)).id
                     break;
 
                 case "removeChecklistFromCard":
@@ -177,19 +179,23 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
                 default:
                     return res.json("no code")
             }
-            await Trello.checklists[type]({ ...action.data.checklist })
+            await Trello.checklists[type](action.data.checklist)
+            // await Trello.checklists.createChecklist({  })
         }
         
         // active webhook in the card
-        await Trello.webhooks.updateWebhook({ id: wid, active: true })
-
+        
         res.send("complete")
     } catch (error) {
+        await Trello.webhooks.updateWebhook({ id: wid, active: true })
+        res.send("error")
         console.error(error)
     }
 })
 
-const getCheck = async(idCard, name) => (await Trello.cards.getCardChecklists({ idCard })).find(c => c.name === name)
+// addAttachmentToCard, deleteAttachmentFromCard
+
+const getCheck = async(idCard, name) => (await Trello.cards.getCardChecklists({ id: idCard })).find(c => c.name === name)
 
 /* 
 deleteCheckItem = {

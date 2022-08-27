@@ -19,5 +19,6 @@ app.use('/callback', callback)
 app.use('/', index)
 
 const PORT = process.env.PORT || 5000;
+const URL = process.env.URL
 
-app.listen(PORT, console.log('Server Running on port ', PORT))
+app.listen(PORT, console.log('Server Running on url ', URL))
