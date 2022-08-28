@@ -54,7 +54,7 @@ router.patch("/rearrangement", async(req, res) => {
         ]
         /* try {
             // const wh = await Trello.cards.updateCard({ id: "6300b429f8450d008d173709", start: new Date("2022-08-19") })
-            const wh = await Trello.cards.getCardAttachments({ id: "6309eb54d71291009470f9b0"})
+            const wh = await Trello.cards.getCard({ id: "7G4go8d2", fields: "none,name" })
             // await Trello.checklists.createChecklist({ id: "6300b429f8450d008d173709" })
             res.json(wh)
         } catch (error) {
@@ -124,6 +124,57 @@ router.patch("/rearrangement", async(req, res) => {
                         callbackURL: `${URL}callback/connect2cards/${card.id}/${wb.id}`
                     })
                     await Trello.webhooks.updateWebhook({ id: wb.id, callbackURL: `${URL}callback/connect2cards/${card2.id}/${wb2.id}` })
+                } else {
+                    start = new Date()
+
+                    end.setDate( end.getDate() + 1 )
+                    end.setHours(23, 59, 59, 99)
+
+                    if (date > start && date < end) {
+
+                        const atts = await Trello.cards.getCardAttachments({ id: card.id })
+                        // find in attachments
+                        const att = atts.find(async att => {
+                            if (!att.url || !att.url.startsWith('https://trello.com/c/')) return false
+                            console.log(1)
+                            const shortId = att.url.split("/")[4]
+                            console.log(shortId)
+                            if (!shortId) return false
+                            console.log(2)
+                            try {
+                                console.log(3)
+                                const card2 = await Trello.cards.getCard({ id: shortId, fields: "name" })
+                                console.log(4)
+                                console.log(card2.name)
+                                if (card.name === card2.name) return true
+                            } catch (error) {
+                                console.log(5)
+                                return false
+                            }
+                        })
+                        console.log(att)
+                        if (att) return
+                        card.idLabels = []
+                        const card2 = await Trello.cards.createCard({
+                            ...card,
+                            idList: idLists[3],
+                        })
+                        // connect cards
+                        await Trello.cards.createCardAttachment({ id: card.id, url: card2.shortUrl })
+                        await Trello.cards.createCardAttachment({ id: card2.id, url: card.shortUrl })
+    
+                        const wb = await Trello.webhooks.createWebhook({
+                            idModel: card.id,
+                            description: "connect this card with " + card2.shortUrl,
+                            callbackURL: `${URL}callback/connect2cards/${card2.id}/wid`
+                        })
+                        const wb2 = await Trello.webhooks.createWebhook({
+                            idModel: card2.id,
+                            description: "connect this card with " + card2.shortUrl,
+                            callbackURL: `${URL}callback/connect2cards/${card.id}/${wb.id}`
+                        })
+                        await Trello.webhooks.updateWebhook({ id: wb.id, callbackURL: `${URL}callback/connect2cards/${card2.id}/${wb2.id}` })
+                    }
                 }
             });
         })
