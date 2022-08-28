@@ -135,6 +135,7 @@ router.patch("/rearrangement", async(req, res) => {
                         const atts = await Trello.cards.getCardAttachments({ id: card.id })
                         // find in attachments
                         const att = atts.find(async att => {
+
                             if (!att.url || !att.url.startsWith('https://trello.com/c/')) return false
                             console.log(1)
                             const shortId = att.url.split("/")[4]
@@ -142,13 +143,10 @@ router.patch("/rearrangement", async(req, res) => {
                             if (!shortId) return false
                             console.log(2)
                             try {
-                                console.log(3)
                                 const card2 = await Trello.cards.getCard({ id: shortId, fields: "name" })
-                                console.log(4)
                                 console.log(card2.name)
                                 if (card.name === card2.name) return true
                             } catch (error) {
-                                console.log(5)
                                 return false
                             }
                         })
