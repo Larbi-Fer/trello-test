@@ -137,11 +137,8 @@ router.patch("/rearrangement", async(req, res) => {
                         const att = atts.find(async att => {
 
                             if (!att.url || !att.url.startsWith('https://trello.com/c/')) return false
-                            console.log(1)
                             const shortId = att.url.split("/")[4]
-                            console.log(shortId)
                             if (!shortId) return false
-                            console.log(2)
                             try {
                                 const card2 = await Trello.cards.getCard({ id: shortId, fields: "name" })
                                 console.log(card2.name)
@@ -150,7 +147,7 @@ router.patch("/rearrangement", async(req, res) => {
                                 return false
                             }
                         })
-                        console.log(att)
+
                         if (att) return
                         card.idLabels = []
                         const card2 = await Trello.cards.createCard({
