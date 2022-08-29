@@ -3,7 +3,9 @@ const Trellojs = require("trello.js")
 const Trello = new Trellojs.TrelloClient({ key: "4c3f73efe799ce3be4134c6262af24c8", token: "97cb553962782fd607ad992fbc4112c713e1d1d5633026413832d9a1f959e10a" })
 
 const primaryBoard = "62ff565b4bc60f00af2cc07e"
+//                          programmation         ,     la fac
 const secondaryBoards = [ "62ff55a6507edf006375a4a6", "62ff566a299282008d42db7e" ]
+const idLabels = ["62ff565d1818e60499d4c750", "62ff565d1818e60499d4c752"]
 require("dotenv").config()
 const URL = process.env.URL
 
@@ -54,7 +56,7 @@ router.patch("/rearrangement", async(req, res) => {
         ]
         /* try {
             // const wh = await Trello.cards.updateCard({ id: "6300b429f8450d008d173709", start: new Date("2022-08-19") })
-            const wh = await Trello.cards.getCard({ id: "7G4go8d2", fields: "none,name" })
+            const wh = await Trello.cards.addCardLabel({ id: "630c997a95b4ab010b06d318", value: "la fac" })
             // await Trello.checklists.createChecklist({ id: "6300b429f8450d008d173709" })
             res.json(wh)
         } catch (error) {
@@ -87,7 +89,7 @@ router.patch("/rearrangement", async(req, res) => {
         })
 
         // جلب مهام آخر 3 أيام
-        secondaryBoards.forEach(async id => {
+        secondaryBoards.forEach(async (id, iLabel) => {
             const cards = await Trello.boards.getBoardCards({ id })
 
             cards.forEach(async card => {
@@ -96,22 +98,24 @@ router.patch("/rearrangement", async(req, res) => {
 
                 var start = new Date()
                 start.setHours(00, 00, 00, 00)
-                start.setDate( start.getDate() + 2 )
                 
                 var end = new Date()
                 end.setDate( end.getDate() + 2 )
                 end.setHours(23, 59, 59, 99)
-
                 if (date > start && date < end) {
-                    // return res.json(card)
                     card.idLabels = []
+                    end.setDate( new Date().getDate() )
+                    const iList = date > start && date < end ? 4 : 3
                     const card2 = await Trello.cards.createCard({
                         ...card,
-                        idList: idLists[3],
+                        idList: idLists[iList],
                     })
                     // connect cards
                     await Trello.cards.createCardAttachment({ id: card.id, url: card2.shortUrl })
                     await Trello.cards.createCardAttachment({ id: card2.id, url: card.shortUrl })
+
+                    // add label
+                    await Trello.cards.addCardLabel({ id: card2.id, value: idLabels[iLabel] })
 
                     const wb = await Trello.webhooks.createWebhook({
                         idModel: card.id,

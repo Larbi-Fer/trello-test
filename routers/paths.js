@@ -20,22 +20,22 @@ const URL = process.env.URL
 // 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
 // https://developers.google.com/oauthplayground/#step1&apisSelect=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar%2Chttps%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar.events&url=https%3A%2F%2F&content_type=application%2Fjson&http_method=GET&useDefaultOauthCred=checked&oauthEndpointSelect=Google&oauthAuthEndpointValue=https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fv2%2Fauth&oauthTokenEndpointValue=https%3A%2F%2Foauth2.googleapis.com%2Ftoken&includeCredentials=checked&accessTokenType=bearer&autoRefreshToken=unchecked&accessType=offline&prompt=consent&response_type=code&wrapLines=on
 
-// const oAuth2Client = new OAuth2(
-//     "750612677491-6519kichdcfia0ha0m4vreirqq52mh5r.apps.googleusercontent.com",
-//     "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",
-//     // "https://localhost:5000"
-// )
+/* const oAuth2Client = new OAuth2(
+    "750612677491-6519kichdcfia0ha0m4vreirqq52mh5r.apps.googleusercontent.com",
+    "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",
+    URL
+)
 
-// const  rl = oAuth2Client.generateAuthUrl({
-//     access_type: "offline",
-//     scope: ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events"],
-//     redirect_uri: "https://ai-way.herokuapp.com/card/webhook"
-// })
-// console.log(rl)
+const  rl = oAuth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events"],
+    redirect_uri: URL + "card/calendar"
+})
+console.log(rl) */
 
 router.get("/callback", async(req, res) => {
     try {
-        const tick = await tickAPI.login({ username: "ferhaoui.20044@gmail.com", password })
+        const tick = await tickAPI.login({ username: "", password })
         // const tasks = await tickAPI.getCompletedTasks({begin: new Date("06/09/2022"), end: new Date("06/11/2022")})
         res.send("ok")
     } catch (error) {
@@ -140,25 +140,29 @@ router.post('/move-cards-to-list', (req, res) => {
 
 router.get('/webhook', (req, res) => {
     return res.status(200).send("ok")
-    const token = req.query.code
-    oAuth2Client.getToken("4/0AdQt8qgulyCIlr8PMcDyGhXeI0BF5rfCtlndigJ0tGb5eLA0SYT5GwQCqZH6xwWFKsDHCA").then(v => console.log("value", v)).catch(err => console.error("error", err))
-    oAuth2Client.setCredentials({ refresh_token: token })
-    const calendar = google.calendar({ version: "v3", auth: oAuth2Client })
-    const start = new Date(new Date().setDate(new Date().getDate() + 2))
-    const end = new Date(new Date().setDate(new Date().getDate() + 2))
-    end.setMinutes(end.getMinutes() + 45)
-    calendar.freebusy.query({
-        resource: {
-            timeMin: start,
-            timeMax: end,
-            items: [{id: "primary"}]
-        }
-    }, (err, res) => {
-        if (err) return console.error("error in google calendar", err)
-        const eventsArr = res.data.calendars.primary.busy
-        if (eventsArr.length === 0) return calendar.events.insert({
+})
+
+router.post('/calendar', async(req, res) => {
+    console.log("open")
+    res.send("ok")
+})
+
+router.get('/calendar', async(req, res) => {
+    try {
+        const code = req.query.code
+        console.log(code)
+        const t = await oAuth2Client.getToken(code)
+        oAuth2Client.setCredentials({ refresh_token: code })
+        console.log(t)
+        // return res.send("ok")
+        const calendar = google.calendar({ version: "v3", auth: oAuth2Client })
+        const start = new Date(new Date().setDate(new Date().getDate() + 2))
+        const end = new Date(new Date().setDate(new Date().getDate() + 2))
+        end.setMinutes(end.getMinutes() + 45)
+
+        calendar.events.insert({
             calendarId: "primary",
-            requestBody: {
+            resource: {
                 summary: "title",
                 location: "JQ38+JWG، بشار",
                 description: "desc",
@@ -170,11 +174,40 @@ router.get('/webhook', (req, res) => {
             if (err) return console.error("error in create new calendar", err)
             return console.log("calendar event created.")
         })
-        return console.log("sorry")
-    })
 
-    return res.status(200).json({ status: "ok" })
+        /* calendar.freebusy.query({
+            requestBody: {
+                timeMin: start,
+                timeMax: end,
+                items: [{id: "primary"}]
+            }
+        }, (err, res) => {
+            if (err) return console.error("error in google calendar", err)
+            const eventsArr = res.data.calendars.primary.busy
+            if (eventsArr.length === 0) return calendar.events.insert({
+                calendarId: "primary",
+                requestBody: {
+                    summary: "title",
+                    location: "JQ38+JWG، بشار",
+                    description: "desc",
+                    start: { dateTime: start },
+                    end: { dateTime: end },
+                    colorId: 2
+                }
+            }, err => {
+                if (err) return console.error("error in create new calendar", err)
+                return console.log("calendar event created.")
+            })
+            return console.log("sorry")
+        }) */
+    
+        return res.status(200).json({ status: "ok" })
+    } catch (error) {
+        console.log(error)
+        return res.send("error !!")
+    }
 })
+
 router.post('/webhook', async(req, res) => {
     const action = req.body.action
     if (action.type === "updateCard") {

@@ -180,6 +180,7 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
         } else if ( action.type.search("Attachment") !== -1 ) {
             // Attachments
             var type;
+            // console.log(action.data)
             switch (action.type) {
                 case "addAttachmentToCard":
                     action.data.attachment.id = id
@@ -195,6 +196,9 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
                     return res.send('no code')
             }
             await Trello.cards[type](action.data.attachment)
+        } else if ( action.type === "deleteCard" ) {
+            // delete card
+            await Trello.cards.deleteCard({ id })
         }
         
         // active webhook in the card
