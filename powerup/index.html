@@ -13,12 +13,15 @@
   <!-- Axios -->
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script>
-    const URL = "https://ai-way.herokuapp.com/"
+    // const url = "https://ai-way.herokuapp.com/"
+    const url = "https://5000-larbifer-trellotest-sm1owl3d5ne.ws-eu63.gitpod.io/"
+    const secondaryBoards = [ "62ff55a6507edf006375a4a6", "62ff566a299282008d42db7e" ]
+
     TrelloPowerUp.initialize({
       'card-buttons': function (t, options) {
         return [
           {
-            icon: "https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png",
+            icon: "https://cdn-icons-png.flaticon.com/512/1679/1679769.png",
             text: "ID card",
             callback: function (t) {
               return t.card('all').then(card => {
@@ -35,13 +38,28 @@
                 t.get("board", "shared", "complete").then(async idList => {
                   if (!idList) return t.alert("no list complete")
                   try {
-                    var { data } = await axios.post(URL + 'card/complete', { idCard: card.id, idList })
+                    var { data } = await axios.post(url + 'card/complete', { idCard: card.id, idList })
                     t.alert("complete")
                   } catch (e) {
                     console.log(e)
                     t.alert("error !!")
                   }
                     
+                })
+              })
+            },
+          },
+          {
+            icon: "https://cdn-icons-png.flaticon.com/512/659/659999.png",
+            text: "Add a connected card",
+            callback: function (t) {
+              return t.board('id').then(({ id }) => {
+                t.card('id').then(({ id: idCard}) => {
+                  axios.post(url + "connect2cards", { id: idCard, iLabel: secondaryBoards.indexOf(id) }).then(() => {
+                    t.alert({message: "Added a connected card"})
+                  }).catch(() => {
+                    t.alert({message: 'oops, error !!'})
+                  })
                 })
               })
             },
@@ -82,13 +100,13 @@
           }
         ]
       },
-      'card-back-section': function(t, options){
+      /* 'card-back-section': function(t, options){
         return {
           title: 'My Card Back Section',
-          // icon: GRAY_ICON, // Must be a gray icon, colored icons not allowed.
+          icon: "https://cdn-icons-png.flaticon.com/512/1679/1679769.png",
           content: {
             type: 'iframe',
-            url: t.signUrl('https://history-bac.netlify.app'),
+            url: './addCards.html',
             // url: './addCards.html',
             height: 230, // Max height is 1500.
           },
@@ -97,7 +115,7 @@
             callback: (t) => console.log("callback")
           }
         };
-      },
+      }, */
       'list-actions':  t => {
           var lists = []
           t.lists("id", "name").then(listsp => lists = listsp)
@@ -118,6 +136,7 @@
             } */
             var returnList = [{
                 text: "Get List ID",
+                icon: "https://cdn-icons-png.flaticon.com/512/1679/1679769.png",
                 callback: function (t) {
                   alert(`list name: ${list.name}, ID: "${list.id}"`)
                 }
@@ -190,7 +209,7 @@
         });
       },
       'on-enable': (t, opts) => {
-        t.board("id").then(({ id }) => axios.get(URL + "callback/addwebhook/" + id))
+        t.board("id").then(({ id }) => axios.get(url + "callback/addwebhook/" + id))
       }
     })
   </script>

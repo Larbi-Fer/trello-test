@@ -6,12 +6,12 @@ const primaryBoard = "62ff565b4bc60f00af2cc07e"
 //                          programmation         ,     la fac
 const secondaryBoards = [ "62ff55a6507edf006375a4a6", "62ff566a299282008d42db7e" ]
 const idLabels = ["62ff565d1818e60499d4c750", "62ff565d1818e60499d4c752"]
+const idLists = ['62ff9fc7765cfa00d89b143c', '62ff9fc4fa46d400bea49ba3', '62ff9fb5aa7769001f385d85', '62ff9f3b9619c8004d5056e3', '62ff9ec5c366390018576548']
 require("dotenv").config()
 const URL = process.env.URL
 
 router.patch("/rearrangement", async(req, res) => {
     try {
-        const idLists = ['62ff9fc7765cfa00d89b143c', '62ff9fc4fa46d400bea49ba3', '62ff9fb5aa7769001f385d85', '62ff9f3b9619c8004d5056e3', '62ff9ec5c366390018576548']
         const conditions = [
             {
                 callback: () => false
@@ -104,32 +104,31 @@ router.patch("/rearrangement", async(req, res) => {
                 end.setDate( end.getDate() + 2 )
                 end.setHours(23, 59, 59, 99)
                 if (date > start && date < end) {
-                    
-                    end.setDate( end.getDate() + 1 )
-                    end.setHours(23, 59, 59, 99)
-                    
-                    if (date > start && date < end) {
+                    const atts = await Trello.cards.getCardAttachments({ id: card.id })
+                    // find in attachments
+                    const att = atts.find(att => {
                         
-                        const atts = await Trello.cards.getCardAttachments({ id: card.id })
-                        // find in attachments
-                        const att = atts.find(att => {
-                            
-                            if (!att.url || !att.url.startsWith('https://trello.com/c/')) return false
-                            const shortId = att.url.split("/")[4]
-                            if (!shortId) return false
-                            Trello.cards.getCard({ id: shortId, fields: "name" }).then(card2 => {
-                                if (card.name === card2.name) return true
-                            }).catch(err => {
-                                console.error(err)
-                                return false
-                            })
+                        if (!att.url || !att.url.startsWith('https://trello.com/c/')) return false
+                        const shortId = att.url.split("/")[4]
+                        if (!shortId) return false
+                        Trello.cards.getCard({ id: shortId, fields: "name" }).then(card2 => {
+                            if (card.name === card2.name) return true
+                        }).catch(err => {
+                            console.error(err)
+                            return false
                         })
-                        
-                        if (att) return
-                        end.setDate( new Date().getDate() )
-                        const iList = date > start && date < end ? 4 : 3
-                        createConnectCard(card, idLists[iList], [idLabels[iLabel]])
-                    }
+                    })
+                    
+                    if (att) return
+
+                    const start = new Date()
+                    start.setHours(00, 00, 00, 00)
+                    
+                    const end = new Date()
+                    end.setHours(23, 59, 59, 99)
+                    const iList = date > start && date < end ? 4 : 3
+
+                    createConnectCard(card, iLabel, idLists[iList])
                 }
             });
         })
@@ -139,15 +138,45 @@ router.patch("/rearrangement", async(req, res) => {
     }
 })
 
-const createConnectCard = async(card, idList, idLabels) => {
-    console.log("card", card.id)
+router.post('/connect2cards', async(req, res) => {
+    try {
+        const { id, iLabel } = req.body
+        console.log(id)
+        // get card detail
+        const card = await Trello.cards.getCard({ id })
+
+        // culc date
+        var date = card.badges.start ?? card.due
+        if (!date) return await createConnectCard(card, iLabel, idLists[2])
+        date = new Date(date)
+        const start = new Date()
+        start.setHours(00, 00, 00, 00)
+        
+        const end = new Date()
+        end.setHours(23, 59, 59, 99)
+
+        const next2day = new Date()
+        next2day.setDate( next2day.getDate() + 2 )
+        next2day.setHours(23, 59, 59, 99)
+        console.log(start, " , ", date, " , ", end, " , ", next2day)
+        // get list
+        var iList = date > start && date < end ? 4 : ( date > next2day ? 2 : 3 )
+        console.log(iList)
+        await createConnectCard(card, iLabel, idLists[iList])
+    } catch (error) {
+        console.error(error)
+        res.send("error")
+    }
+})
+
+const createConnectCard = async(card, iLabel, idList) => {
     const card2 = await Trello.cards.createCard({
         ...card,
-        idList,
-        idLabels,
+        idList: idList,
+        idLabels: [idLabels[iLabel]],
         pos: "bottom"
     })
-
+    
     // add badges in card 1 to card 2
     if (card.badges.attachments) {
         const atts = await Trello.cards.getCardAttachments({ id: card.id })
