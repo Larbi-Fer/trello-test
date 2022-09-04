@@ -55,11 +55,9 @@ router.patch("/rearrangement", async(req, res) => {
             },
         ]
         /* try {
-            // const wh = await Trello.cards.updateCard({ id: "6300b429f8450d008d173709", start: new Date("2022-08-19") })
-            // const wh = await Trello.checklists.createChecklistCheckItems([ { id: "630dd2054b8af60203708427", name: "t3" }, { id: "630dd2054b8af60203708427", name: "t4" } ])
-            const wh = await Trello.cards.getCardChecklists({ id: "630dd1a44d6b97004dff6794", fields: "name" })
             // await Trello.checklists.createChecklist({ id: "6300b429f8450d008d173709" })
-            res.json(wh)
+            console.log(req.body)
+            res.json({ hello: "world" })
         } catch (error) {
             res.send("error")
             console.log(error)

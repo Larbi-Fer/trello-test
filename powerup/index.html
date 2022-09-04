@@ -67,6 +67,10 @@
         ]
       },
       'board-buttons': function (t, options) {
+        t.get("board", "shared", "refresh").then(async date => {
+          if (date && date == new Date().getDate()) return
+          axios.patch(url + "rearrangement").then(() => t.set("board", "shared", "refresh", new Date().getDate()))
+        }).catch(err => console.error("error: ", err))
         return [
           { 
             icon: "https://cdn-icons-png.flaticon.com/512/3524/3524659.png",
