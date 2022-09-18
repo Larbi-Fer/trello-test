@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://trello.com/power-ups/power-up.css">
+    <title>execution time</title>
+    <style>
+        #one, #two {
+            display: none;
+        }
+        button {
+            width: 100%;
+        }
+        label#timeLabel {
+            text-align: center;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <form id="content" >
+        <div id="one">
+            <label for="time">time</label>
+            <input type="text" id="time">
+            <button>SAVE</button>
+        </div>
+        <div id="two">
+            <label id="timeLabel"></label>
+            <button>DELETE</button>
+        </div>
+    </form>
+
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+    <script async=true>
+
+        const t = TrelloPowerUp.iframe()
+
+        t.get("card", "shared", "time").then(time => {
+            document.getElementById(time ? "two" : "one").style.display = "block"
+    
+            if (time) document.getElementById("timeLabel").innerText = time + " H"
+
+            document.querySelector("form").addEventListener("submit", async e => {
+                e.preventDefault()
+                await (time ? t.remove("card", "shared", "time") : t.set("card", "shared", "time", document.getElementById("time").value))
+                t.closePopup()
+            })
+            t.render(() => {
+                t.sizeTo("#content").done()
+            })
+        })
+
+
+    </script>
+</body>
+</html>
