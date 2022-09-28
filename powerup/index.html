@@ -13,8 +13,8 @@
   <!-- Axios -->
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script>
-    // const url = "https://ai-way.herokuapp.com/"
-    const url = "https://5000-larbifer-trellotest-sm1owl3d5ne.ws-eu63.gitpod.io/"
+    const url = "https://ai-way.herokuapp.com/"
+    // const url = "https://5000-larbifer-trellotest-sm1owl3d5ne.ws-eu67.gitpod.io/"
     const secondaryBoards = [ "62ff55a6507edf006375a4a6", "62ff566a299282008d42db7e" ]
 
     TrelloPowerUp.initialize({
@@ -71,6 +71,14 @@
                 url: "./time.html",
                 height: 100,
             })
+          },{
+            icon: "https://cdn-icons-png.flaticon.com/128/3867/3867499.png",
+            text: "Create in google calendar",
+            callback: t => {
+              t.card("id").then(({ id }) => {
+                axios.post(url + "create2calendar", { cardID: id }).then(({ data }) => t.alert({ message: data.status }))
+              })
+            }
           }
         ]
       },
@@ -84,15 +92,17 @@
         }]
       },
       'board-buttons': function (t, options) {
-        t.get("board", "shared", "refresh").then(async date => {
+        t.get("member", "shared", "refresh").then(async date => {
+          console.log("data")
           if (date && date == new Date().getDate()) return
-          axios.patch(url + "rearrangement").then(() => t.set("board", "shared", "refresh", new Date().getDate()))
+          axios.patch(url + "rearrangement").then(() => t.set("member", "shared", "refresh", new Date().getDate()))
         }).catch(err => console.error("error: ", err))
         return [
-          { 
+          {
             icon: "https://cdn-icons-png.flaticon.com/512/3524/3524659.png",
             text: "options",
-            callback: function (t, opts) {
+            callback: (t, opts) => {
+              t.set("member", "shared", "refresh", 19)
               t.popup({
                 title: "options",
                 items: [{
@@ -111,7 +121,8 @@
                   })
                 }, {
                   text: "copy id board",
-                  callback: (t, opts) => t.board("id").then(({ id }) => /* navigator.clipboard.writeText( id ) */alert(id) || t.closePopup())
+                  // callback: (t, opts) => t.board("id").then(({ id }) => /* navigator.clipboard.writeText( id ) */alert(id) || t.closePopup())
+                  callback: (t, opts) => t.member("id").then(({ id }) => /* navigator.clipboard.writeText( id ) */alert("member id: " + id) || t.closePopup())
                 }]
                 /* url: './addCards.html',
                 height: 184,

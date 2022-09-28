@@ -13,25 +13,26 @@ const Trellojs = require("trello.js")
 const Trello2 = new Trellojs.TrelloClient({ key: "4c3f73efe799ce3be4134c6262af24c8", token: "97cb553962782fd607ad992fbc4112c713e1d1d5633026413832d9a1f959e10a" })
 // Trello2 = Trello2("4c3f73efe799ce3be4134c6262af24c8", "97cb553962782fd607ad992fbc4112c713e1d1d5633026413832d9a1f959e10a")
 
-// const { OAuth2 } = google.auth
 const client_id = "750612677491-6519kichdcfia0ha0m4vreirqq52mh5r.apps.googleusercontent.com"
 require("dotenv").config()
 const URL = process.env.URL
 // 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
-// https://developers.google.com/oauthplayground/#step1&apisSelect=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar%2Chttps%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar.events&url=https%3A%2F%2F&content_type=application%2Fjson&http_method=GET&useDefaultOauthCred=checked&oauthEndpointSelect=Google&oauthAuthEndpointValue=https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fv2%2Fauth&oauthTokenEndpointValue=https%3A%2F%2Foauth2.googleapis.com%2Ftoken&includeCredentials=checked&accessTokenType=bearer&autoRefreshToken=unchecked&accessType=offline&prompt=consent&response_type=code&wrapLines=on
+// https://developers.google.com/oauthplayground/
+// https://console.cloud.google.com/apis/credentials?project=time-management-project-359515
 
-/* const oAuth2Client = new OAuth2(
+const oAuth2Client = new google.auth.OAuth2(
     "750612677491-6519kichdcfia0ha0m4vreirqq52mh5r.apps.googleusercontent.com",
     "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",
-    URL
+    URL + "card/calendar"
 )
 
 const  rl = oAuth2Client.generateAuthUrl({
     access_type: "offline",
-    scope: ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events"],
-    redirect_uri: URL + "card/calendar"
+    scope: ["openid", "email", "profile", "https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.events.readonly", "https://www.googleapis.com/auth/calendar.readonly"],
+    // redirect_uri: URL + "card/calendar",
+    response_type: "code"
 })
-console.log(rl) */
+console.log(rl)
 
 router.get("/callback", async(req, res) => {
     try {
@@ -143,26 +144,60 @@ router.get('/webhook', (req, res) => {
 })
 
 router.post('/calendar', async(req, res) => {
-    console.log("open")
-    res.send("ok")
+    oAuth2Client.setCredentials({ refresh_token: process.env.refresh_token })
+    const calendar = google.calendar("v3")
+    const response = await calendar.events.insert({
+        auth: oAuth2Client,
+        calendarId: "primary",
+        requestBody: {
+            summary: "test",
+            description: "description\n##test\n`test 2`",
+            location: "JQ38+JWG، بشار",
+            colorId: "7",
+            start :{ dateTime: new Date("2022-09-22 10:00") },
+            end :{ dateTime: new Date("2022-09-22 15:00") },
+        }
+    })
+    /* const response = await calendar.freebusy.query({
+        requestBody: {
+            timeMin: new Date("2022-09-22 10:00"),
+            timeMax: new Date("2022-09-22 15:00"),
+            items: [{id: "primary"}]
+        }
+    }) */
+    res.send(response)
 })
 
-router.get('/calendar', async(req, res) => {
+router.get('/calendar', async (req, res) => {
     try {
-        const code = req.query.code
-        console.log(code)
-        const t = await oAuth2Client.getToken(code)
-        oAuth2Client.setCredentials({ refresh_token: code })
-        console.log(t)
-        // return res.send("ok")
+        // const { code } = req.query
+        // const { tokens } = await oAuth2Client.getToken(code)
+        // console.log({ tokens })
+        
+        oAuth2Client.setCredentials({ refresh_token: process.env.refresh_token })
+
         const calendar = google.calendar({ version: "v3", auth: oAuth2Client })
+        const watch = await calendar.events.watch({
+            calendarId: "primary",
+            requestBody: {
+                address: URL + "calendar/watch2",
+                type: "webhook",
+                id: "primary5",
+                // payload: true,
+                params: {ttl: "300"},
+                // expiration: "60",
+            }
+        })
+        // return res.send("ok")
+        // console.log(watch)
+        return res.send({ watch })
         const start = new Date(new Date().setDate(new Date().getDate() + 2))
         const end = new Date(new Date().setDate(new Date().getDate() + 2))
         end.setMinutes(end.getMinutes() + 45)
 
         calendar.events.insert({
             calendarId: "primary",
-            resource: {
+            requestBody: {
                 summary: "title",
                 location: "JQ38+JWG، بشار",
                 description: "desc",
