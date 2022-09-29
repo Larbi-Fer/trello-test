@@ -72,7 +72,7 @@
                 height: 100,
             })
           },{
-            icon: "https://cdn-icons-png.flaticon.com/128/3867/3867499.png",
+            icon: "https://cdn-icons-png.flaticon.com/128/5968/5968499.png",
             text: "Create in google calendar",
             callback: t => {
               t.card("id").then(({ id }) => {
@@ -107,7 +107,7 @@
                 title: "options",
                 items: [{
                   text: "settings",
-                  callback: (t, opts) => t.popup({
+                  callback: (t, opts) => t.set("member", "shared", "refresh", 19) || t.popup({
                     title: "settings",
                     url: "./settings.html",
                     height: 140,
@@ -122,7 +122,7 @@
                 }, {
                   text: "copy id board",
                   // callback: (t, opts) => t.board("id").then(({ id }) => /* navigator.clipboard.writeText( id ) */alert(id) || t.closePopup())
-                  callback: (t, opts) => t.member("id").then(({ id }) => /* navigator.clipboard.writeText( id ) */alert("member id: " + id) || t.closePopup())
+                  callback: (t, opts) => t.board("id").then(({ id }) => /* navigator.clipboard.writeText( id ) */alert("member id: " + id) || t.closePopup())
                 }]
                 /* url: './addCards.html',
                 height: 184,

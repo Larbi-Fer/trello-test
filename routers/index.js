@@ -142,11 +142,12 @@ router.patch("/rearrangement", async(req, res) => {
                     const iList = date > start && date < end ? 4 : 3
 
                     await createConnectCard(card, iLabel, idLists[iList])
-                    await createInGoogleC(card, id+7)
+                    await createInGoogleC(card, iLabel+7)
                 }
             });
         })
 
+        // archiffed cards
         const cardsArch = await Trello.boards.getBoardCardsFilter({ id: primaryBoard, filter: "closed" })
         cardsArch.forEach(async card => {
             try {
