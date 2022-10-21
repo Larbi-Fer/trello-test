@@ -102,12 +102,11 @@
             icon: "https://cdn-icons-png.flaticon.com/512/3524/3524659.png",
             text: "options",
             callback: (t, opts) => {
-              t.set("member", "shared", "refresh", 19)
               t.popup({
                 title: "options",
                 items: [{
                   text: "settings",
-                  callback: (t, opts) => t.set("member", "shared", "refresh", 19) || t.popup({
+                  callback: (t, opts) => t.popup({
                     title: "settings",
                     url: "./settings.html",
                     height: 140,
