@@ -28,7 +28,8 @@ const oAuth2Client = new google.auth.OAuth2(
 
 const  rl = oAuth2Client.generateAuthUrl({
     access_type: "offline",
-    scope: ["openid", "email", "profile", "https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.events.readonly", "https://www.googleapis.com/auth/calendar.readonly"],
+    // scope: ["openid", "email", "profile", "https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.events.readonly", "https://www.googleapis.com/auth/calendar.readonly"],
+    scope: ["openid", "email", "profile", "https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events"],
     // redirect_uri: URL + "card/calendar",
     response_type: "code"
 })
@@ -170,11 +171,11 @@ router.post('/calendar', async(req, res) => {
 
 router.get('/calendar', async (req, res) => {
     try {
-        // const { code } = req.query
-        // const { tokens } = await oAuth2Client.getToken(code)
-        // console.log({ tokens })
+        const { code } = req.query
+        const { tokens } = await oAuth2Client.getToken(code)
+        console.log({ tokens })
         
-        oAuth2Client.setCredentials({ refresh_token: process.env.refresh_token })
+        /* oAuth2Client.setCredentials({ refresh_token: process.env.refresh_token })
 
         const calendar = google.calendar({ version: "v3", auth: oAuth2Client })
         const watch = await calendar.events.watch({
@@ -187,10 +188,11 @@ router.get('/calendar', async (req, res) => {
                 params: {ttl: "300"},
                 // expiration: "60",
             }
-        })
+        }) */
         // return res.send("ok")
         // console.log(watch)
-        return res.send({ watch })
+        // return res.send({ watch })
+        return res.json({ tokens })
         const start = new Date(new Date().setDate(new Date().getDate() + 2))
         const end = new Date(new Date().setDate(new Date().getDate() + 2))
         end.setMinutes(end.getMinutes() + 45)
