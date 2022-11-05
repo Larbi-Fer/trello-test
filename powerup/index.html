@@ -14,7 +14,7 @@
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script>
     const url = "https://ai-way.herokuapp.com/"
-    // const url = "https://5000-larbifer-trellotest-sm1owl3d5ne.ws-eu67.gitpod.io/"
+    // const url = "https://5000-larbifer-trellotest-nh874ih2a05.ws-eu73.gitpod.io/"
     const secondaryBoards = [ "62ff55a6507edf006375a4a6", "62ff566a299282008d42db7e" ]
 
     TrelloPowerUp.initialize({
@@ -55,11 +55,11 @@
             callback: function (t) {
               return t.board('id').then(({ id }) => {
                 t.card('id').then(({ id: idCard}) => {
-                  axios.post(url + "connect2cards", { id: idCard, iLabel: secondaryBoards.indexOf(id) }).then(() => {
+                  t.list("name").then(({name}) => axios.post(url + "connect2cards", { id: idCard, iLabel: secondaryBoards.indexOf(id), title: name }).then(() => {
                     t.alert({message: "Added a connected card"})
                   }).catch(() => {
                     t.alert({message: 'oops, error !!'})
-                  })
+                  }))
                 })
               })
             },
@@ -92,11 +92,11 @@
         }]
       },
       'board-buttons': function (t, options) {
-        t.get("member", "shared", "refresh").then(async date => {
+        /* t.get("member", "shared", "refresh").then(async date => {
           console.log("data")
           if (date && date == new Date().getDate()) return
           axios.patch(url + "rearrangement").then(() => t.set("member", "shared", "refresh", new Date().getDate()))
-        }).catch(err => console.error("error: ", err))
+        }).catch(err => console.error("error: ", err)) */
         return [
           {
             icon: "https://cdn-icons-png.flaticon.com/512/3524/3524659.png",
