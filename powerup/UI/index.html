@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trello cards</title>
+    <style>
+
+        div {
+            padding: 2px 20px;
+            font-size: 20px;
+        }
+
+        div#cards {
+            width: max-content;
+            padding-left: 100%;
+            transform: translateX(-50%);
+        }
+
+        div#cards .card div:first-child {
+            font-weight: bold;
+        }
+
+        div.card {
+            background: #0ff;
+            border-radius: 10px;
+            padding: 5px 25px;
+            margin: 5px auto;
+            position: relative;
+        }
+        
+        div.complete, div.incomplete {
+            width: 15px;
+            height: 15px;
+            padding: 5px;
+            background-size: cover;
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+        }
+        div.complete { background-image: url("https://cdn-icons-png.flaticon.com/512/190/190411.png"); }
+        div.incomplete { background-image: url("https://cdn-icons-png.flaticon.com/128/463/463575.png"); }
+
+    </style>
+</head>
+<body>
+
+    <div id="cards">
+
+    </div>
+    
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+
+        // const url = "https://5000-larbifer-trellotest-nh874ih2a05.ws-eu74.gitpod.io"
+        const url = "https://ai-way.herokuapp.com"
+
+        var queryString = window.location.search;
+        queryString = queryString.replace("?", "")
+        const id = queryString.split("=")[1]
+        
+        axios.post(url + "/card/get-cards", { id }).then(({data}) => {
+            const cards = document.getElementById("cards")
+            for (const card of data) {
+                console.log(card)
+                const carde = document.createElement("div")
+
+                const name = document.createElement("div")
+                name.innerText = card.name
+
+                const startd = document.createElement("div")
+                startd.innerText = date(card.badges.start)
+
+                const dued = document.createElement("div")
+                dued.innerText = date(card.due)
+
+                const dueComplite = document.createElement("div")
+                dueComplite.classList.add(card.dueComplete ? "complete" : "incomplete")
+
+                carde.classList.add("card")
+                carde.appendChild(name)
+                carde.appendChild(startd)
+                carde.appendChild(dued)
+                carde.appendChild(dueComplite)
+
+                cards.appendChild(carde)
+            }
+        })
+
+        function date(d = new Date) {
+            if (!d) return null
+            d = new Date(d)
+            return d.getDate() + "/" + (d.getMonth()+1) + "/" + d.getFullYear() + "  " + doubleNum(d.getHours()) + ":" + doubleNum(d.getMinutes())
+        }
+
+        function doubleNum(num) {
+            if (num == null || num == undefined) return null
+            // console.log(num.length)
+            return String(num).length == 1 ? ("0" + num) : String(num)
+        }
+
+    </script>
+
+</body>
+</html>

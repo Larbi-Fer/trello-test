@@ -119,6 +119,17 @@ router.post("/addcards", async(req, res) => {
     }
 })
 
+router.post("/get-cards", async(req, res) => {
+    try {
+        const { id } = req.body;
+        const cards = await Trello2.lists.getListCards({ id })
+        res.json(cards)
+    } catch (error) {
+        console.log(error)
+        res.status(400).send("error")
+    }
+})
+
 router.post('/move-cards-to-list', (req, res) => {
     const { idList, idCards } = req.body
     idCards.forEach(async idCard => {
