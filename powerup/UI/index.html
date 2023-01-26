@@ -64,7 +64,6 @@
         axios.post(url + "/card/get-cards", { id }).then(({data}) => {
             const cards = document.getElementById("cards")
             for (const card of data) {
-                console.log(card)
                 const carde = document.createElement("div")
 
                 const name = document.createElement("div")
@@ -86,6 +85,9 @@
                 carde.appendChild(dueComplite)
 
                 cards.appendChild(carde)
+            }
+            if (data.length == 0) {
+                cards.innerHTML = "<h2>No cards</h2>"
             }
         })
 
