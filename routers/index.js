@@ -276,7 +276,7 @@ router.post("/create2calendar", async (req, res) => {
 const createConnectCard = async(card, iLabel, idList, title) => {
     const card2 = await Trello.cards.createCard({
         ...card,
-        name: `${card.name} (${title.split(" ")[0]})`, 
+        name: card.name,
         idList: idList,
         idLabels: [idLabels[iLabel]],
         pos: "bottom"

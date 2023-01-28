@@ -2,6 +2,9 @@ const router = require('express').Router()
 
 const Trellojs = require("trello.js")
 const Trello = new Trellojs.TrelloClient({ key: "4c3f73efe799ce3be4134c6262af24c8", token: "97cb553962782fd607ad992fbc4112c713e1d1d5633026413832d9a1f959e10a" })
+require("dotenv").config()
+
+const url = process.env.URL
 
 
 router.get(["/connect2cardsv1/:id", "/connect2cardsv2", "/connect2cards/:id/:wid"], (req, res) => {
@@ -89,7 +92,7 @@ router.post("/connect2cardsv2", async(req, res) => {
 router.get('/addwebhook/:id', async(req, res) => {
     let data = {
         description: 'Webhook board',
-        callbackURL: 'https://ai-way.herokuapp.com/card/webhook',
+        callbackURL: url + 'card/webhook',
         idModel: req.params.id,
         // active: false
     };
