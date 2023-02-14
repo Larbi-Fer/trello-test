@@ -86,21 +86,16 @@ router.patch("/rearrangement", async(req, res) => {
                 // console.log(cards[0]?.name)
                 cards.forEach(async card => {
                     const result = conditions[i].callback(card)
-                    console.log(result, card.name, i)
                     if (!result && !conditions[i].idList2) return
                     if (result === false) return
-                    console.log(3)
                     if (conditions[i].archive) {
-                        console.log(2)
                         lists.archiveAllCardsInList({ id: idList })
                         return
                     }
                     const data = { idList: result ? conditions[i].idList : conditions[i].idList2, id: card.id }
                     try {
-                        console.log(3)
                         await Trello.cards.updateCard(data)
                     } catch (error) {
-                        console.log(4)
                         return res.json({ error: "err", card: card.name })
                     }
                 })
@@ -126,20 +121,16 @@ router.patch("/rearrangement", async(req, res) => {
                 if (date > start && date < end) {
                     const atts = await Trello.cards.getCardAttachments({ id: card.id })
                     // find in attachments
-                    const att = atts.find(att => {
-
+                    var isAtt = false
+                    for (const att of atts) {
                         if (!att.url || !att.url.startsWith('https://trello.com/c/')) return false
                         const shortId = att.url.split("/")[4]
                         if (!shortId) return false
-                        Trello.cards.getCard({ id: shortId, fields: "name" }).then(card2 => {
-                            if (card.name === card2.name) return true
-                        }).catch(err => {
-                            console.error(err)
-                            return false
-                        })
-                    })
-
-                    if (att) return
+                        const card2 = await Trello.cards.getCard({ id: shortId, fields: "name" })
+                        card2.name = card2.name.split(" -")[0]
+                        if (card.name === card2.name) isAtt = true
+                    }
+                    if (isAtt) return
 
                     const start = new Date()
                     start.setHours(00, 00, 00, 00)
@@ -150,7 +141,7 @@ router.patch("/rearrangement", async(req, res) => {
 
                     const title = (await Trello.lists.getList({ id: card.idList })).name
                     await createConnectCard(card, iLabel, idLists[iList], title)
-                    await createInGoogleC(card, iLabel+7)
+                    await createInGoogleC(card, iLabel+7, title)
                 }
             });
         })
@@ -276,7 +267,7 @@ router.post("/create2calendar", async (req, res) => {
 const createConnectCard = async(card, iLabel, idList, title) => {
     const card2 = await Trello.cards.createCard({
         ...card,
-        name: card.name,
+        name: `${card.name} - ${title}`,
         idList: idList,
         idLabels: [idLabels[iLabel]],
         pos: "bottom"
@@ -318,14 +309,14 @@ const createConnectCard = async(card, iLabel, idList, title) => {
     await Trello.webhooks.updateWebhook({ id: wb.id, callbackURL: `${URL}callback/connect2cards/${card2.id}/${wb2.id}` })
 }
 
-const createInGoogleC = async (card, colorId) => {
+const createInGoogleC = async (card, colorId, title) => {
     oAuth2Client.setCredentials({ refresh_token: process.env.refresh_token })
     const calendar = google.calendar("v3")
     const response = await calendar.events.insert({
         auth: oAuth2Client,
         calendarId: "primary",
         requestBody: {
-            summary: card.name,
+            summary: `${card.name} - ${title}`,
             description: card.desc,
             colorId,
             start :{ dateTime: card.badges.start ? new Date(card.badges.start) : null },
