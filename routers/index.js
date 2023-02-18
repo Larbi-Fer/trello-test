@@ -186,7 +186,7 @@ router.post('/connect2cards', async(req, res) => {
         // get list
         var iList = date > start && date < end ? 4 : ( date > next2day ? 2 : 3 )
         await createConnectCard(card, iLabel, idLists[iList], title)
-        await createInGoogleC(card, 8)
+        await createInGoogleC(card, iLabel+7, title)
     } catch (error) {
         console.error(error)
         res.status(400).send("error")
