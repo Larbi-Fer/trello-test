@@ -21,15 +21,9 @@ const oAuth2Client = new google.auth.OAuth2(
     URL + "card/calendar"
 )
 
-var date = 0
-
 router.patch("/rearrangement", async(req, res) => {
     console.log("opened")
     try {
-        var date2 = new Date().getDate()
-        if (date2 === date) return res.send("ok")
-
-        date = new Date().getDate()
         const conditions = [
             {
                 callback: () => false
@@ -55,14 +49,15 @@ router.patch("/rearrangement", async(req, res) => {
             },
             {
                 callback: card => {
-                    const date = new Date(card.badges.start)
+                    const startDate = new Date(card.badges.start)
+                    const endDate = new Date(card.badges.due)
                     var start = new Date()
                     start.setHours(00, 00, 00, 00)
                     
                     var end = new Date()
                     end.setHours(23, 59, 59, 99)
 
-                    return date > start && date < end
+                    return ( startDate > start && startDate < end ) || ( endDate > start && endDate < end )
                 },
                 idList: idLists[4]
             },
