@@ -131,7 +131,6 @@ router.patch("/rearrangement", async(req, res) => {
                         if (!att.url || !att.url.startsWith('https://trello.com/c/')) return false
                         const shortId = att.url.split("/")[4]
                         if (!shortId) return false
-                        console.log(shortId)
                         const card2 = await Trello.cards.getCard({ id: shortId, fields: "name" })
                         var name = card2.name.split(" - ")[0]
                         if (card.name === name || card.name === card2.name) isAtt = true
@@ -145,11 +144,8 @@ router.patch("/rearrangement", async(req, res) => {
                     const iList = date > start && date < end ? 4 : 3
                     
                     const title = (await Trello.lists.getList({ id: card.idList })).name
-                    console.log(3)
                     await createConnectCard(card, iLabel, idLists[iList], title)
-                    console.log(4)
                     // await createInGoogleC(card, iLabel+7, title)
-                    // console.log(5)
                 }
             });
         })
@@ -273,7 +269,6 @@ router.post("/create2calendar", async (req, res) => {
 })
 
 const createConnectCard = async(card, iLabel, idList, title) => {
-    console.log("Start")
     const card2 = await Trello.cards.createCard({
         ...card,
         name: `${card.name} - ${title}`,
@@ -293,7 +288,6 @@ const createConnectCard = async(card, iLabel, idList, title) => {
     // connect cards
     await Trello.cards.createCardAttachment({ id: card.id, url: card2.shortUrl })
     await Trello.cards.createCardAttachment({ id: card2.id, url: card.shortUrl })
-    console.log(22)
     
     if (card.idChecklists.length) {
         const checkls = await Trello.cards.getCardChecklists({ id: card.id, fields: "name" })
@@ -305,23 +299,18 @@ const createConnectCard = async(card, iLabel, idList, title) => {
             }
         }
     }
-    console.log(33)
     
     const wb = await Trello.webhooks.createWebhook({
         idModel: card.id,
         description: "connect this card with " + card2.shortUrl,
         callbackURL: `${URL}callback/connect2cards/${card2.id}/wid`
     })
-    console.log(44)
     const wb2 = await Trello.webhooks.createWebhook({
         idModel: card2.id,
         description: "connect this card with " + card2.shortUrl,
         callbackURL: `${URL}callback/connect2cards/${card.id}/${wb.id}`
     })
-    console.log(55)
     await Trello.webhooks.updateWebhook({ id: wb.id, callbackURL: `${URL}callback/connect2cards/${card2.id}/${wb2.id}` })
-    console.log(66)
-    console.log("End")
 }
 
 const createInGoogleC = async (card, colorId, title) => {
