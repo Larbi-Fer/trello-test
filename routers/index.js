@@ -104,16 +104,26 @@ router.patch("/rearrangement", async(req, res) => {
             const cards = await Trello.boards.getBoardCards({ id })
 
             cards.forEach(async card => {
-                if (!card.badges.start) return
-                const date = new Date(card.badges.start)
-
+                if (!card.badges.start && !card.badges.due) return
+                // console.log(!card.badges.start && !card.badges.due, card.badges.start, card.badges.due)
                 var start = new Date()
                 start.setHours(00, 00, 00, 00)
 
                 var end = new Date()
                 end.setDate( end.getDate() + 2 )
                 end.setHours(23, 59, 59, 99)
-                if (date > start && date < end) {
+                var date;
+                var isComplete = false
+                if(card.badges.start) {
+                    date = new Date(card.badges.start)
+                    isComplete = start < date && date > end
+                } 
+                if(card.badges.due) {
+                    date = new Date(card.badges.due)
+                    isComplete = isComplete || (date > start && date < end)
+                }
+
+                if (isComplete) {
                     const atts = await Trello.cards.getCardAttachments({ id: card.id })
                     // find in attachments
                     var isAtt = false
@@ -121,22 +131,25 @@ router.patch("/rearrangement", async(req, res) => {
                         if (!att.url || !att.url.startsWith('https://trello.com/c/')) return false
                         const shortId = att.url.split("/")[4]
                         if (!shortId) return false
+                        console.log(shortId)
                         const card2 = await Trello.cards.getCard({ id: shortId, fields: "name" })
-                        card2.name = card2.name.split(" -")[0]
-                        if (card.name === card2.name) isAtt = true
+                        var name = card2.name.split(" - ")[0]
+                        if (card.name === name || card.name === card2.name) isAtt = true
                     }
                     if (isAtt) return
-
                     const start = new Date()
                     start.setHours(00, 00, 00, 00)
-
+                    
                     const end = new Date()
                     end.setHours(23, 59, 59, 99)
                     const iList = date > start && date < end ? 4 : 3
-
+                    
                     const title = (await Trello.lists.getList({ id: card.idList })).name
+                    console.log(3)
                     await createConnectCard(card, iLabel, idLists[iList], title)
-                    await createInGoogleC(card, iLabel+7, title)
+                    console.log(4)
+                    // await createInGoogleC(card, iLabel+7, title)
+                    // console.log(5)
                 }
             });
         })
@@ -260,6 +273,7 @@ router.post("/create2calendar", async (req, res) => {
 })
 
 const createConnectCard = async(card, iLabel, idList, title) => {
+    console.log("Start")
     const card2 = await Trello.cards.createCard({
         ...card,
         name: `${card.name} - ${title}`,
@@ -267,7 +281,7 @@ const createConnectCard = async(card, iLabel, idList, title) => {
         idLabels: [idLabels[iLabel]],
         pos: "bottom"
     })
-
+    
     // add badges in card 1 to card 2
     if (card.badges.attachments) {
         const atts = await Trello.cards.getCardAttachments({ id: card.id })
@@ -275,11 +289,12 @@ const createConnectCard = async(card, iLabel, idList, title) => {
             await Trello.cards.createCardAttachment({ ...att, id: card2.id })
         })
     }
-
+    
     // connect cards
     await Trello.cards.createCardAttachment({ id: card.id, url: card2.shortUrl })
     await Trello.cards.createCardAttachment({ id: card2.id, url: card.shortUrl })
-
+    console.log(22)
+    
     if (card.idChecklists.length) {
         const checkls = await Trello.cards.getCardChecklists({ id: card.id, fields: "name" })
         for (const checkl of checkls) {
@@ -290,18 +305,23 @@ const createConnectCard = async(card, iLabel, idList, title) => {
             }
         }
     }
+    console.log(33)
     
     const wb = await Trello.webhooks.createWebhook({
         idModel: card.id,
         description: "connect this card with " + card2.shortUrl,
         callbackURL: `${URL}callback/connect2cards/${card2.id}/wid`
     })
+    console.log(44)
     const wb2 = await Trello.webhooks.createWebhook({
         idModel: card2.id,
         description: "connect this card with " + card2.shortUrl,
         callbackURL: `${URL}callback/connect2cards/${card.id}/${wb.id}`
     })
+    console.log(55)
     await Trello.webhooks.updateWebhook({ id: wb.id, callbackURL: `${URL}callback/connect2cards/${card2.id}/${wb2.id}` })
+    console.log(66)
+    console.log("End")
 }
 
 const createInGoogleC = async (card, colorId, title) => {

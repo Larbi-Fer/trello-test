@@ -15,7 +15,6 @@ router.post("/connect2cardsv1/:id", async(req, res) => {
     try {
         const id = req.params.id
         const action = req.body.action
-        console.log(action)
         const { checkItem, checklist, attch } = req.query
         const data = action.data
 
@@ -114,7 +113,6 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
     const { action } = req.body
     // console.log(action.display.entities)
     // const idCard = req.body.action.card.id
-    console.log(action.type)
     try {
         // desactive webhook in the card
         await Trello.webhooks.updateWebhook({ id: wid, active: false })
@@ -140,8 +138,6 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
                     state = "cards"
                     action.data.checkItem.idCheckItem = (await getCheck(id, action.data.checklist.name)).checkItems.find(ci => ci.name === action.data.checkItem.name).id
                     action.data.checkItem.id = id
-                    console.log(action.data.checkItem)
-                    // console.log(action.data.checkItem)
                     break;
 
                 case "deleteCheckItem":

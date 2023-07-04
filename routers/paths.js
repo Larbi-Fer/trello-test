@@ -83,7 +83,7 @@ router.post("/addcards", async(req, res) => {
             dueComplete: false,
         };
         const result = await Trello2.cards.createCard(data);
-        const check = await Trello2.checklists.createChecklist({ idCard: result.id, name: "les steps" });
+        const check = await Trello2.checklists.createChecklist({ idCard: result.id, name: "steps" });
         await Trello2.webhooks.createWebhook({
             idModel: result.id,
             description: `connect this card (${result.url}) with multi cards`,
