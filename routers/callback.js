@@ -7,7 +7,7 @@ require("dotenv").config()
 const url = process.env.URL
 
 
-router.get(["/connect2cardsv1/:id", "/connect2cardsv2", "/connect2cards/:id/:wid"], (req, res) => {
+router.get(["/connect2cardsv1/:id", "/connect2cardsv2", "/connect2cards/:id/:wid", "/ticktick/webhook"], (req, res) => {
     res.status(200).send("this webhook is work")
 })
 
@@ -105,7 +105,6 @@ router.get('/addwebhook/:id', async(req, res) => {
         }
     }
     res.send("OK")
-    console.log('response', response);
 })
 
 router.post("/connect2cards/:id/:wid", async(req, res) => {
@@ -158,7 +157,6 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
                 case "addChecklistToCard":
                     type = "createChecklist"
                     action.data.checklist.idCard = id
-                    console.log(action.data.checklist)
                     break;
 
                 case "updateChecklist":
@@ -179,7 +177,6 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
         } else if ( action.type.search("Attachment") !== -1 ) {
             // Attachments
             var type;
-            // console.log(action.data)
             switch (action.type) {
                 case "addAttachmentToCard":
                     action.data.attachment.id = id
@@ -209,6 +206,27 @@ router.post("/connect2cards/:id/:wid", async(req, res) => {
         res.send("error")
         console.error(error)
     }
+})
+
+
+router.post("/ticktick/webhook", async(req, res) => {
+    const { action } = req.body
+    console.log(action.type)
+    if (action.type == "createCheckItem") {
+        var { id, due, shortUrl, idLabels } = (await Trello.cards.getCard({ id: action.data.card.id }))
+        due = new Date(due).toISOString()
+        var dueDate = ""
+        for (let i = 0; i < 19; i++) dueDate += due[i];
+        dueDate += '+0000'
+        require("../main").createTaskOnTicktick({
+            title: action.data.checkItem.name,
+            dueDate,
+            content: action.data.card.name + "\n" + shortUrl,
+            desc: id + "," + action.data.checkItem.id,
+            projectId: require(".").types.find(v => v.cardId == idLabels[0]).listId
+        })
+    }
+    res.send("complete")
 })
 
 const getCheck = async(idCard, name) => (await Trello.cards.getCardChecklists({ id: idCard })).find(c => c.name === name)

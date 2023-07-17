@@ -1,15 +1,36 @@
 const router = require("express").Router()
 const Trellojs = require("trello.js")
+const axios = require('axios');
 const Trello = new Trellojs.TrelloClient({ key: "4c3f73efe799ce3be4134c6262af24c8", token: "97cb553962782fd607ad992fbc4112c713e1d1d5633026413832d9a1f959e10a" })
 
 const primaryBoard = "62ff565b4bc60f00af2cc07e"
 require("dotenv").config()
 
-//                          programmation         ,     la fac
+//                          programmation         ,     la fac               ,        ML
 const secondaryBoards = [ "62ff55a6507edf006375a4a6", "62ff566a299282008d42db7e" ]
-const idLabels = ["62ff565d1818e60499d4c750", "62ff565d1818e60499d4c752"]
+const idLabels = ["62ff565d1818e60499d4c750", "62ff565d1818e60499d4c752", "64b2e720d4ba428534ff827f"]
 const idLists = ['62ff9fc7765cfa00d89b143c', '62ff9fc4fa46d400bea49ba3', '62ff9fb5aa7769001f385d85', '62ff9f3b9619c8004d5056e3', '62ff9ec5c366390018576548']
 require("dotenv").config()
+
+const MLLists = ['62ff5a34c5bf7400c34ada58', '62ff5af24d6cfa0025421514', '62ff5b4b54c254005352251a', '64b427d3d83ae2e387993ec4']
+
+var types =  [{
+    cardId: '62ff565d1818e60499d4c750',
+    listId: "0d4a46eb911a97ddd8a1ddad",
+    name: 'programmation',
+}, {
+    cardId: '62ff565d1818e60499d4c752',
+    listId: "339d4f4ab45aed888c5201d2",
+    name: 'la fac',
+}, {
+    cardId: '63349140e11e50016110a148',
+    listId: "37b648dfa0126fc4cf2ea9c5",
+    name: 'English',
+}, {
+    cardId: '64b2e720d4ba428534ff827f',
+    listId: "bdad43c2b928cadca1ee560c",
+    name: 'ML',
+}]
 
 const URL = process.env.URL
 
@@ -22,7 +43,6 @@ const oAuth2Client = new google.auth.OAuth2(
 )
 
 router.patch("/rearrangement", async(req, res) => {
-    console.log("opened")
     try {
         const conditions = [
             {
@@ -35,11 +55,11 @@ router.patch("/rearrangement", async(req, res) => {
             {
                 callback: card => {
                     const date = new Date(card.badges.start)
-                    var start = new Date()
+                    var start = today()
                     start.setDate( start.getDate() + 1 )
-                    start.setHours(00, 00, 00, 00)
+                    start.setHours(0, 0, 0, 0)
 
-                    var end = new Date()
+                    var end = today()
                     end.setDate( end.getDate() + 3 )
                     end.setHours(23, 59, 59, 99)
 
@@ -51,10 +71,10 @@ router.patch("/rearrangement", async(req, res) => {
                 callback: card => {
                     const startDate = new Date(card.badges.start)
                     const endDate = new Date(card.badges.due)
-                    var start = new Date()
-                    start.setHours(00, 00, 00, 00)
+                    var start = today()
+                    start.setHours(0, 0, 0, 0)
                     
-                    var end = new Date()
+                    var end = today()
                     end.setHours(23, 59, 59, 99)
 
                     return ( startDate > start && startDate < end ) || ( endDate > start && endDate < end )
@@ -62,18 +82,11 @@ router.patch("/rearrangement", async(req, res) => {
                 idList: idLists[4]
             },
             {
-                callback: card => card.dueComplete ? true : (new Date(card.due) < new Date() ? null : false),
+                callback: card => card.dueComplete ? true : (new Date(card.due) < today() ? null : false),
                 idList: idLists[1],
                 idList2: idLists[0]
             },
         ]
-        /* try {
-            res.json({ ok: "ok" })
-        } catch (error) {
-            res.send("error")
-            console.log(error)
-        }
-        return */
         const lists = Trello.lists
         idLists.forEach(async(idList, i) => {
             try {
@@ -106,10 +119,10 @@ router.patch("/rearrangement", async(req, res) => {
             cards.forEach(async card => {
                 if (!card.badges.start && !card.badges.due) return
                 // console.log(!card.badges.start && !card.badges.due, card.badges.start, card.badges.due)
-                var start = new Date()
-                start.setHours(00, 00, 00, 00)
-
-                var end = new Date()
+                var start = today()
+                start.setHours(0, 0, 0, 0)
+                
+                var end = today()
                 end.setDate( end.getDate() + 2 )
                 end.setHours(23, 59, 59, 99)
                 var date;
@@ -122,7 +135,7 @@ router.patch("/rearrangement", async(req, res) => {
                     date = new Date(card.badges.due)
                     isComplete = isComplete || (date > start && date < end)
                 }
-
+                
                 if (isComplete) {
                     const atts = await Trello.cards.getCardAttachments({ id: card.id })
                     // find in attachments
@@ -136,19 +149,38 @@ router.patch("/rearrangement", async(req, res) => {
                         if (card.name === name || card.name === card2.name) isAtt = true
                     }
                     if (isAtt) return
-                    const start = new Date()
-                    start.setHours(00, 00, 00, 00)
+                    const start = today()
+                    start.setHours(0, 0, 0, 0)
                     
-                    const end = new Date()
+                    const end = today()
                     end.setHours(23, 59, 59, 99)
                     const iList = date > start && date < end ? 4 : 3
-                    
                     const title = (await Trello.lists.getList({ id: card.idList })).name
-                    await createConnectCard(card, iLabel, idLists[iList], title)
+                    iLabel = MLLists.find( list => list == card.idList) ? 2 : iLabel
+                    var card2 = await createConnectCard(card, iLabel, idLists[iList], title)
+                    await createOnTicktick(card2)
                     // await createInGoogleC(card, iLabel+7, title)
                 }
             });
         })
+
+        // Get complete tasks from ticktick to sync with trello
+        /* types.forEach(({ listId: id }) => {
+            require("../main.js").fetchData.get(`https://api.ticktick.com/open/v1/project/${id}/data`).then(({data}) => {
+                data.tasks.forEach(task => {
+                    const start = new Date()
+                    start.setHours(0, 0, 0, 0)
+                    
+                    const end = new Date()
+                    end.setHours(23, 59, 59, 99)
+
+                    if(task.dueDate < end && task.dueDate > start && task.desc) {
+                        var dt = task.desc.split(',')
+                        Trello.cards.updateCardCheckItem({ id: dt[0], idCheckItem: dt[1], state: "complete" })
+                    }
+                })
+            })
+        }) */
 
         // archiffed cards
         const cardsArch = await Trello.boards.getBoardCardsFilter({ id: primaryBoard, filter: "closed" })
@@ -168,6 +200,8 @@ router.patch("/rearrangement", async(req, res) => {
     }
 })
 
+var today = () => new Date(new Date().setDate(new Date().getDate() + 1))
+
 router.post('/connect2cards', async(req, res) => {
     try {
         const { id, iLabel, title } = req.body
@@ -179,7 +213,7 @@ router.post('/connect2cards', async(req, res) => {
         if (!date) return await createConnectCard(card, iLabel, idLists[2], title)
         date = new Date(date)
         const start = new Date()
-        start.setHours(00, 00, 00, 00)
+        start.setHours(0, 0, 0, 0)
         
         const end = new Date()
         end.setHours(23, 59, 59, 99)
@@ -311,6 +345,43 @@ const createConnectCard = async(card, iLabel, idList, title) => {
         callbackURL: `${URL}callback/connect2cards/${card.id}/${wb.id}`
     })
     await Trello.webhooks.updateWebhook({ id: wb.id, callbackURL: `${URL}callback/connect2cards/${card2.id}/${wb2.id}` })
+    return card2
+}
+
+const createOnTicktick = async card => {
+    // a.get("https://api.ticktick.com/open/v1/project/inbox119487817/task/64b12ff78f08cc2c767cdd15").then(r => console.log(r.data)).catch(e => console.log("error: ", e))
+    /* console.log(card)
+    return
+    // console.log(a)
+    return; */
+    
+    var projectId = ""
+    projectId = types.find(v => v.cardId == card.idLabels[0]).listId
+    var checkLists = await Trello.cards.getCardChecklists({ id: card.id })
+    checkLists.forEach(items => {
+        items.checkItems.forEach(item => {
+
+            var b = new Date(card.due).toISOString()
+            var c = ""
+            for (let i = 0; i < 19; i++) c += b[i];
+            c += '+0000'
+            require("../main").createTaskOnTicktick({
+                title: item.name,
+                dueDate: c,
+                content: card.name + '\n' + card.shortUrl,
+                desc: card.id + ',' + item.id,
+                projectId
+            })
+
+        });
+    });
+    Trello.webhooks.createWebhook({
+        idModel: card.id,
+        description: "desc" ,
+        callbackURL: `${URL}callback/ticktick/webhook`
+    })
+    // console.log((await Trello.cards.getCard({ id })).idLabels[5])
+    // console.log(checkItems)
 }
 
 const createInGoogleC = async (card, colorId, title) => {
@@ -330,4 +401,4 @@ const createInGoogleC = async (card, colorId, title) => {
     return response
 }
 
-module.exports = router
+module.exports = { router, types }
