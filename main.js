@@ -23,9 +23,6 @@ const PORT = process.env.PORT || 5000;
 const URL = process.env.URL
 
 app.listen(PORT, () => {
-    /* axios.default.head.common = {
-        'Authorization': `Bearer 397f6e8e-99c3-4ac6-8eb5-109a84157b31`
-    }; */
     console.log('Server Running on url ', URL)
 })
 
