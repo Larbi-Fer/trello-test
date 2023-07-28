@@ -151,6 +151,18 @@ router.post('/move-cards-to-list', (req, res) => {
     });
 })
 
+router.post('/add-to-trello', (req, res) => {
+    const card = req.body.card
+    // console.log(card)
+    // return res.send('ok')
+    require('.').createOnTicktick(card).then(() => {
+        return res.status(200).send("OK")
+    }).catch(err => {
+        console.log(err)
+        return res.status(401).send('ERROR')
+    })
+})
+
 router.get('/webhook', (req, res) => {
     return res.status(200).send("ok")
 })

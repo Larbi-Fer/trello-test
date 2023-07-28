@@ -349,15 +349,11 @@ const createConnectCard = async(card, iLabel, idList, title) => {
 }
 
 const createOnTicktick = async card => {
-    // a.get("https://api.ticktick.com/open/v1/project/inbox119487817/task/64b12ff78f08cc2c767cdd15").then(r => console.log(r.data)).catch(e => console.log("error: ", e))
-    /* console.log(card)
-    return
-    // console.log(a)
-    return; */
-    
     var projectId = ""
-    projectId = types.find(v => v.cardId == card.idLabels[0]).listId
-    var checkLists = await Trello.cards.getCardChecklists({ id: card.id })
+    var labels = card.idLabels ?? card.labels.map(v => v.id)
+    if (!labels.length)
+        projectId = types.find(v => v.cardId == labels[0])?.listId
+    var checkLists = card.labels ? card.checklists : await Trello.cards.getCardChecklists({ id: card.id })
     checkLists.forEach(items => {
         items.checkItems.forEach(item => {
 
@@ -401,4 +397,4 @@ const createInGoogleC = async (card, colorId, title) => {
     return response
 }
 
-module.exports = { router, types }
+module.exports = { router, types, createOnTicktick }

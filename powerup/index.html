@@ -13,8 +13,8 @@
   <!-- Axios -->
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script>
-    const url = "https://my-way.onrender.com/"
-    // const url = "https://5000-larbifer-trellotest-nh874ih2a05.ws-eu73.gitpod.io/"
+    // const url = "https://my-way.onrender.com/"
+    const url = "https://5000-larbifer-trellotest-qsze2gxhqtn.ws-eu102.gitpod.io/"
     const secondaryBoards = [ "62ff55a6507edf006375a4a6", "62ff566a299282008d42db7e" ]
 
     TrelloPowerUp.initialize({
@@ -48,6 +48,20 @@
                 })
               })
             },
+          },
+          {
+            icon: "https://cdn-icons-png.flaticon.com/512/1679/1679769.png",
+            text: "Add SubTasks to Ticktick",
+            callback: function (t) {
+              return t.card('all').then(card => {
+                axios.post(url + "card/add-to-trello", { card }).then(() => {
+                    t.alert({message: "All tasks have been added successfully"})
+                  }).catch(() => {
+                    t.alert({message: 'oops, error !!'})
+                  })
+                // alert(`id: "${card.id}"`)
+              })
+            }
           },
           {
             icon: "https://cdn-icons-png.flaticon.com/512/659/659999.png",
