@@ -351,31 +351,27 @@ const createConnectCard = async(card, iLabel, idList, title) => {
 const createOnTicktick = async card => {
     var projectId = ""
     var labels = card.idLabels ?? card.labels.map(v => v.id)
-    if (!labels.length)
+    if (labels.length)
         projectId = types.find(v => v.cardId == labels[0])?.listId
     var checkLists = card.labels ? card.checklists : await Trello.cards.getCardChecklists({ id: card.id })
     checkLists.forEach(items => {
         items.checkItems.forEach(item => {
 
-            var b = new Date(card.due).toISOString()
-            var c = ""
-            for (let i = 0; i < 19; i++) c += b[i];
-            c += '+0000'
             require("../main").createTaskOnTicktick({
                 title: item.name,
-                dueDate: c,
-                content: card.name + '\n' + card.shortUrl,
-                desc: card.id + ',' + item.id,
+                dueDate: card.due,
+                desc: card.name + '\n' + (card.shortUrl ?? card.url),
+                content: card.id + ',' + item.id,
                 projectId
             })
 
         });
     });
-    Trello.webhooks.createWebhook({
+    /* Trello.webhooks.createWebhook({
         idModel: card.id,
         description: "desc" ,
         callbackURL: `${URL}callback/ticktick/webhook`
-    })
+    }) */
     // console.log((await Trello.cards.getCard({ id })).idLabels[5])
     // console.log(checkItems)
 }

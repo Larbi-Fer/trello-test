@@ -215,12 +215,9 @@ router.post("/ticktick/webhook", async(req, res) => {
     if (action.type == "createCheckItem") {
         var { id, due, shortUrl, idLabels } = (await Trello.cards.getCard({ id: action.data.card.id }))
         due = new Date(due).toISOString()
-        var dueDate = ""
-        for (let i = 0; i < 19; i++) dueDate += due[i];
-        dueDate += '+0000'
         require("../main").createTaskOnTicktick({
             title: action.data.checkItem.name,
-            dueDate,
+            dueDate: due,
             content: action.data.card.name + "\n" + shortUrl,
             desc: id + "," + action.data.checkItem.id,
             projectId: require(".").types.find(v => v.cardId == idLabels[0]).listId

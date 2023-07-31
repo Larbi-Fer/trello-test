@@ -36,7 +36,13 @@ var fetchData = new axios.Axios({
 exports.fetchData = fetchData
 
 exports.createTaskOnTicktick = data => {
-    console.log(data.title)
+    var c = ""
+    if (data.dueDate) {
+        var b = new Date(data.dueDate).toISOString()
+        for (let i = 0; i < 19; i++) c += b[i];
+        c += '+0000'
+    }
+    data.dueDate = c
     data = JSON.stringify(data)
     fetchData.post("https://api.ticktick.com/open/v1/task", data).catch(e => console.log("error: ", e))
 }
